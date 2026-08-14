@@ -16,7 +16,6 @@ export function HUD({ credits, sessionRtp, onReset, muted, onToggleMute, onSignO
         <img src={mascoteTigre} alt="Mascote Tigrinho" className="hud__mascot" />
         <div>
           <h1 className="hud__title">Tigrinho da Sorte</h1>
-          <span className="hud__subtitle">simulador demonstrativo · sem dinheiro real</span>
         </div>
       </div>
       <div className="hud__stats">

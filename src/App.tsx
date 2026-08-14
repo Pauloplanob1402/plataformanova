@@ -106,10 +106,6 @@ function App() {
         {screen === 'indicacao' && <ReferralScreen user={user} onBalanceChange={setCreditsLocally} />}
       </main>
 
-      <footer className="footer">
-        Simulador educativo sem apostas reais. Nenhum valor monetário é processado.
-      </footer>
-
       <WinCelebration data={celebration} />
     </div>
   );
