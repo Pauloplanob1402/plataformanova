@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import mascoteTigre from '../assets/mascote-tigre.webp';
+import bannerSorteAcordou from '../assets/banner-sorte-acordou.webp';
 import { supabase } from '../core/supabaseClient';
 
 type Mode = 'signin' | 'signup';
@@ -87,8 +87,7 @@ export function AuthScreen() {
   return (
     <div className="auth-screen">
       <div className="auth-card">
-        <img src={mascoteTigre} alt="Mascote Tigrinho" className="auth-card__mascot" />
-        <h1 className="auth-card__headline">Você é o próximo vencedor.</h1>
+        <img src={bannerSorteAcordou} alt="A sorte acordou. Você vai deixar passar?" className="auth-card__banner" />
         <p className="auth-card__brand">Tigrinho da Sorte</p>
 
         <div className="tabs" role="tablist" aria-label="Entrar ou criar conta">
