@@ -36,8 +36,8 @@ export function HUD({ credits, sessionRtp, onReset, muted, onToggleMute, onSignO
         >
           {muted ? '🔇' : '🔊'}
         </button>
-        <button className="hud__reset" onClick={onReset}>
-          Recarregar
+        <button className="hud__reset" onClick={onReset} title="Sincroniza o saldo com o servidor e zera o RTP da sessão">
+          Sincronizar
         </button>
         {onSignOut && (
           <button className="hud__icon-btn" onClick={onSignOut} aria-label="Sair" title="Sair">

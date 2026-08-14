@@ -3,13 +3,14 @@ import { Reel } from './Reel';
 import { SYMBOL_TABLE } from '../core/symbols';
 import { SYMBOL_IMAGES } from '../symbols/images';
 import { soundEngine } from '../sound/soundEngine';
-import type { RandomProvider } from '../core/random';
+import { supabase } from '../core/supabaseClient';
 
 interface SlotMachineProps {
   credits: number;
-  placeBet: (amount: number) => boolean;
-  addWinnings: (amount: number) => void;
-  rng: RandomProvider;
+  /** Chamado com o novo saldo assim que o servidor responde (fonte da verdade). */
+  onBalanceChange: (newBalance: number) => void;
+  /** Chamado depois de cada giro resolvido, pra estatística de sessão (cosmético). */
+  onSpinResolved: (betAmount: number, payout: number) => void;
   onWin: (amount: number) => void;
 }
 
@@ -19,21 +20,28 @@ const TICK_MS = 65;
 const REEL_STOP_DELAYS = [600, 820, 1040]; // ms — cada rolo para em sequência
 
 // Durante a ROLAGEM (só efeito visual, antes de cada rolo travar), o tigre
-// aparece bem mais no "embaralhado" pra criar expectativa — o resultado final
-// de cada rolo continua sendo sorteado com os pesos reais da tabela (RTP
-// inalterado). Esse multiplicador só afeta o que passa na tela enquanto gira.
+// aparece bem mais no "embaralhado" pra criar expectativa. Isso é só estética
+// do rolo girando — o resultado final vem do servidor (spin_slot RPC).
 const TIGER_TEASE_MULTIPLIER = 9;
 
-export function SlotMachine({ credits, placeBet, addWinnings, rng, onWin }: SlotMachineProps) {
+const SYMBOL_ID_TO_INDEX = new Map(SYMBOL_TABLE.map((s, i) => [s.id, i]));
+
+interface SpinRpcResult {
+  symbols: string[];
+  payout: number;
+  new_balance: number;
+}
+
+export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }: SlotMachineProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [spinning, setSpinning] = useState(false);
   const [displayIndices, setDisplayIndices] = useState<number[]>([0, 1, 2]);
   const [lastPayout, setLastPayout] = useState<number | null>(null);
   const [flash, setFlash] = useState(false);
+  const [spinError, setSpinError] = useState<string | null>(null);
 
   const betAmount = BET_STEPS[betIndex];
 
-  const weights = SYMBOL_TABLE.map((s) => s.weight);
   const teaseWeights = SYMBOL_TABLE.map((s) =>
     s.id === 'tiger' ? s.weight * TIGER_TEASE_MULTIPLIER : s.weight
   );
@@ -53,32 +61,78 @@ export function SlotMachine({ credits, placeBet, addWinnings, rng, onWin }: Slot
   // Limpa timers pendentes se o componente desmontar no meio de um giro.
   useEffect(() => clearAllTimers, [clearAllTimers]);
 
-  const evaluateResult = useCallback(
-    (results: number[]) => {
-      const allEqual = results.every((v) => v === results[0]);
-      if (!allEqual) return;
+  /** Sorteio "de mentira" só pra animação de embaralhar enquanto esperamos o servidor. */
+  const teaseIndex = useCallback(() => {
+    const total = teaseWeights.reduce((a, b) => a + b, 0);
+    let roll = Math.random() * total;
+    for (let i = 0; i < teaseWeights.length; i++) {
+      roll -= teaseWeights[i];
+      if (roll < 0) return i;
+    }
+    return teaseWeights.length - 1;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      const symbol = SYMBOL_TABLE[results[0]];
-      const payout = Math.round(betAmount * symbol.payoutMultiplier);
-      if (payout <= 0) return;
+  const revealFinalResult = useCallback(
+    (payout: number, newBalance: number) => {
+      reelStoppedRef.current = [false, false, false];
 
-      addWinnings(payout);
-      setLastPayout(payout);
-      setFlash(true);
-      onWin(payout);
-      try {
-        symbol.payoutMultiplier >= 15 ? soundEngine.win(symbol.payoutMultiplier) : soundEngine.coin();
-      } catch {
-        // som nunca deve travar o jogo
+      for (let i = 0; i < REEL_COUNT; i++) {
+        const timeoutId = window.setTimeout(() => {
+          reelStoppedRef.current[i] = true;
+          setDisplayIndices((prev) => {
+            const next = [...prev];
+            next[i] = finalResultsRef.current[i];
+            return next;
+          });
+          try {
+            soundEngine.reelStop();
+          } catch {
+            // ignora falha de áudio
+          }
+
+          if (reelStoppedRef.current.every(Boolean)) {
+            if (intervalIdRef.current) window.clearInterval(intervalIdRef.current);
+            intervalIdRef.current = null;
+            setSpinning(false);
+            try {
+              soundEngine.stopSpinLoop();
+            } catch {
+              // ignora falha de áudio
+            }
+
+            onBalanceChange(newBalance);
+            onSpinResolved(betAmount, payout);
+
+            if (payout > 0) {
+              setLastPayout(payout);
+              setFlash(true);
+              onWin(payout);
+              try {
+                const symbol = SYMBOL_TABLE[finalResultsRef.current[0]];
+                symbol.payoutMultiplier >= 15 ? soundEngine.win(symbol.payoutMultiplier) : soundEngine.coin();
+              } catch {
+                // som nunca deve travar o jogo
+              }
+              window.setTimeout(() => setFlash(false), 900);
+            }
+          }
+        }, REEL_STOP_DELAYS[i]);
+        timeoutIdsRef.current.push(timeoutId);
       }
-      window.setTimeout(() => setFlash(false), 900);
     },
-    [betAmount, addWinnings, onWin]
+    [betAmount, onBalanceChange, onSpinResolved, onWin]
   );
 
-  const handleSpin = useCallback(() => {
+  const handleSpin = useCallback(async () => {
     if (spinning) return;
-    if (!placeBet(betAmount)) return;
+    if (credits < betAmount) return;
+
+    setSpinError(null);
+    setLastPayout(null);
+    setFlash(false);
+    clearAllTimers();
+    setSpinning(true);
 
     try {
       soundEngine.click();
@@ -87,57 +141,33 @@ export function SlotMachine({ credits, placeBet, addWinnings, rng, onWin }: Slot
       // som nunca deve travar o jogo
     }
 
-    // garante que não sobrou nenhum timer de um giro anterior
-    clearAllTimers();
-
-    setLastPayout(null);
-    setFlash(false);
-
-    const results: number[] = [];
-    for (let i = 0; i < REEL_COUNT; i++) {
-      results.push(rng.weightedIndex(weights));
-    }
-    finalResultsRef.current = results;
-    reelStoppedRef.current = [false, false, false];
-
-    setSpinning(true);
-
+    // Animação de "embaralhando" começa já, enquanto esperamos a resposta do servidor.
     intervalIdRef.current = window.setInterval(() => {
-      setDisplayIndices((prev) =>
-        prev.map((idx, i) => (reelStoppedRef.current[i] ? idx : rng.weightedIndex(teaseWeights)))
-      );
+      setDisplayIndices((prev) => prev.map((idx, i) => (reelStoppedRef.current[i] ? idx : teaseIndex())));
     }, TICK_MS);
 
-    for (let i = 0; i < REEL_COUNT; i++) {
-      const timeoutId = window.setTimeout(() => {
-        reelStoppedRef.current[i] = true;
-        setDisplayIndices((prev) => {
-          const next = [...prev];
-          next[i] = finalResultsRef.current[i];
-          return next;
-        });
-        try {
-          soundEngine.reelStop();
-        } catch {
-          // ignora falha de áudio
-        }
+    const { data, error } = await supabase.rpc('spin_slot', { bet_amount: betAmount });
 
-        if (reelStoppedRef.current.every(Boolean)) {
-          if (intervalIdRef.current) window.clearInterval(intervalIdRef.current);
-          intervalIdRef.current = null;
-          setSpinning(false);
-          try {
-            soundEngine.stopSpinLoop();
-          } catch {
-            // ignora falha de áudio
-          }
-          evaluateResult(finalResultsRef.current);
-        }
-      }, REEL_STOP_DELAYS[i]);
-      timeoutIdsRef.current.push(timeoutId);
+    if (error || !data) {
+      clearAllTimers();
+      setSpinning(false);
+      try {
+        soundEngine.stopSpinLoop();
+      } catch {
+        // ignora falha de áudio
+      }
+      setSpinError(
+        error?.message?.toLowerCase().includes('insuficiente')
+          ? 'Créditos insuficientes para essa aposta.'
+          : 'Não foi possível girar agora. Tente novamente.',
+      );
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spinning, placeBet, betAmount, rng, clearAllTimers, evaluateResult]);
+
+    const result = data as SpinRpcResult;
+    finalResultsRef.current = result.symbols.map((id) => SYMBOL_ID_TO_INDEX.get(id) ?? 0);
+    revealFinalResult(result.payout, result.new_balance);
+  }, [spinning, credits, betAmount, clearAllTimers, teaseIndex, revealFinalResult]);
 
   const canDecreaseBet = betIndex > 0 && !spinning;
   const canIncreaseBet = betIndex < BET_STEPS.length - 1 && !spinning;
@@ -152,7 +182,11 @@ export function SlotMachine({ credits, placeBet, addWinnings, rng, onWin }: Slot
       </div>
 
       <div className="payout-line" aria-live="polite">
-        {lastPayout ? `+${lastPayout} créditos!` : 'Alinhe 3 símbolos iguais para ganhar'}
+        {spinError
+          ? spinError
+          : lastPayout
+            ? `+${lastPayout} créditos!`
+            : 'Alinhe 3 símbolos iguais para ganhar'}
       </div>
 
       <div className="controls">

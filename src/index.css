@@ -295,6 +295,85 @@ body {
   color: var(--gold-bright);
 }
 
+/* ---------- Painéis de bônus (check-in, código, indicação) ---------- */
+
+.panel-card {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(184, 23, 47, 0.22), rgba(11, 6, 5, 0.82));
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(216, 168, 78, 0.35);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(216, 168, 78, 0.12);
+}
+
+.panel-card__title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  color: var(--gold-bright);
+  margin: 0 0 4px;
+}
+
+.panel-card__subtitle {
+  font-size: 13px;
+  color: var(--parchment-dim);
+  margin: 0 0 18px;
+}
+
+.daily-checkin__reward {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px 0 20px;
+}
+
+.daily-checkin__reward-value {
+  font-family: var(--font-display);
+  font-size: 34px;
+  color: var(--gold-bright);
+  font-weight: 700;
+}
+
+.daily-checkin__reward-label {
+  font-size: 13px;
+  color: var(--parchment-dim);
+}
+
+.referral-code {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(11, 6, 5, 0.55);
+  border: 1px solid rgba(216, 168, 78, 0.25);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+
+.referral-code__value {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+}
+
+/* ---------- Navegação entre telas (jogo / bônus / código / indicação) ---------- */
+
+.nav-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0;
+  overflow-x: auto;
+}
+
+.nav-tabs .tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 /* ---------- Slot / Tower card ---------- */
 
 .main {
@@ -567,6 +646,12 @@ body {
   color: var(--parchment-dim);
   margin-top: 30px;
   opacity: 0.6;
+}
+
+.footer--error {
+  margin-top: 8px;
+  color: var(--gold-bright);
+  opacity: 0.9;
 }
 
 /* ---------- Responsive ---------- */
