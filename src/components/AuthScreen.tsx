@@ -88,7 +88,7 @@ export function AuthScreen() {
     <div className="auth-screen">
       <div className="auth-card">
         <img src={mascoteTigre} alt="Mascote Tigrinho" className="auth-card__mascot" />
-        <h1 className="auth-card__headline">O tigre da sorte está esperando por você.</h1>
+        <h1 className="auth-card__headline">Você é o próximo vencedor.</h1>
         <p className="auth-card__brand">Tigrinho da Sorte</p>
 
         <div className="tabs" role="tablist" aria-label="Entrar ou criar conta">
