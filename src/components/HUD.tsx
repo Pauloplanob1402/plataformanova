@@ -2,14 +2,13 @@ import mascoteTigre from '../assets/mascote-tigre.webp';
 
 interface HUDProps {
   credits: number;
-  sessionRtp: number;
   onReset: () => void;
   muted: boolean;
   onToggleMute: () => void;
   onSignOut?: () => void;
 }
 
-export function HUD({ credits, sessionRtp, onReset, muted, onToggleMute, onSignOut }: HUDProps) {
+export function HUD({ credits, onReset, muted, onToggleMute, onSignOut }: HUDProps) {
   return (
     <header className="hud">
       <div className="hud__brand">
@@ -23,10 +22,6 @@ export function HUD({ credits, sessionRtp, onReset, muted, onToggleMute, onSignO
           <span className="hud__pill-label">Créditos</span>
           <span className="hud__pill-value">{credits}</span>
         </div>
-        <div className="hud__pill">
-          <span className="hud__pill-label">RTP sessão</span>
-          <span className="hud__pill-value">{(sessionRtp * 100).toFixed(1)}%</span>
-        </div>
         <button
           className="hud__icon-btn"
           onClick={onToggleMute}
@@ -35,7 +30,7 @@ export function HUD({ credits, sessionRtp, onReset, muted, onToggleMute, onSignO
         >
           {muted ? '🔇' : '🔊'}
         </button>
-        <button className="hud__reset" onClick={onReset} title="Sincroniza o saldo com o servidor e zera o RTP da sessão">
+        <button className="hud__reset" onClick={onReset} title="Sincroniza o saldo com o servidor">
           Sincronizar
         </button>
         {onSignOut && (

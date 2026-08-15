@@ -6,6 +6,7 @@ import { AuthScreen } from './components/AuthScreen';
 import { DailyCheckin } from './components/DailyCheckin';
 import { RedeemCode } from './components/RedeemCode';
 import { ReferralScreen } from './components/ReferralScreen';
+import { VipStatus } from './components/VipStatus';
 import { useProfile } from './core/useProfile';
 import { useSessionStats } from './core/useSessionStats';
 import { useBackgroundMusic } from './core/useBackgroundMusic';
@@ -15,19 +16,20 @@ import './index.css';
 // Vitórias acima desse valor disparam a celebração "grande" (mais moedas, banner maior).
 const BIG_WIN_THRESHOLD = 200;
 
-type Screen = 'jogo' | 'bonus' | 'codigo' | 'indicacao';
+type Screen = 'jogo' | 'bonus' | 'codigo' | 'indicacao' | 'vip';
 
 const SCREENS: { id: Screen; label: string }[] = [
   { id: 'jogo', label: '🐯 Jogo' },
-  { id: 'bonus', label: '🎁 Bônus diário' },
+  { id: 'bonus', label: '🎁 Bônus' },
   { id: 'codigo', label: '🎟️ Código' },
   { id: 'indicacao', label: '🤝 Indicação' },
+  { id: 'vip', label: '👑 VIP' },
 ];
 
 function App() {
   const { user, loading: authLoading, signOut } = useAuth();
   const { credits, loading: profileLoading, error: profileError, setCreditsLocally, refetch } = useProfile(user);
-  const { sessionRtp, recordSpin, resetStats } = useSessionStats();
+  const { recordSpin, resetStats } = useSessionStats();
   const { muted, toggleMute } = useBackgroundMusic();
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
   const [screen, setScreen] = useState<Screen>('jogo');
@@ -68,7 +70,6 @@ function App() {
     <div className="app">
       <HUD
         credits={credits ?? 0}
-        sessionRtp={sessionRtp}
         onReset={handleReset}
         muted={muted}
         onToggleMute={toggleMute}
@@ -104,6 +105,7 @@ function App() {
         {screen === 'bonus' && <DailyCheckin user={user} onBalanceChange={setCreditsLocally} />}
         {screen === 'codigo' && <RedeemCode onBalanceChange={setCreditsLocally} />}
         {screen === 'indicacao' && <ReferralScreen user={user} onBalanceChange={setCreditsLocally} />}
+        {screen === 'vip' && <VipStatus user={user} />}
       </main>
 
       <WinCelebration data={celebration} />

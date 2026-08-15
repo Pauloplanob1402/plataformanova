@@ -5,6 +5,8 @@ import { supabase } from '../core/supabaseClient';
 type Mode = 'signin' | 'signup';
 type Method = 'email' | 'phone';
 
+const BANNER_DISMISS_KEY = 'tigrinho:banner-auth-dismissed';
+
 /** Traduz os erros mais comuns do Supabase Auth para mensagens amigáveis em PT-BR. */
 function translateAuthError(message: string): string {
   const m = message.toLowerCase();
@@ -31,6 +33,22 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(() => {
+    try {
+      return localStorage.getItem(BANNER_DISMISS_KEY) === '1';
+    } catch {
+      return false; // localStorage pode falhar em modo privado — sem problema, só não lembra a escolha
+    }
+  });
+
+  const dismissBanner = () => {
+    setBannerDismissed(true);
+    try {
+      localStorage.setItem(BANNER_DISMISS_KEY, '1');
+    } catch {
+      // sem problema se não conseguir salvar — só reaparece na próxima visita
+    }
+  };
 
   const resetFeedback = () => {
     setError(null);
@@ -87,7 +105,20 @@ export function AuthScreen() {
   return (
     <div className="auth-screen">
       <div className="auth-card">
-        <img src={bannerSorteAcordou} alt="A sorte acordou. Você vai deixar passar?" className="auth-card__banner" />
+        {!bannerDismissed && (
+          <div className="auth-card__banner-wrap">
+            <img src={bannerSorteAcordou} alt="Banner promocional do Tigrinho da Sorte" className="auth-card__banner" />
+            <button
+              type="button"
+              className="auth-card__banner-close"
+              onClick={dismissBanner}
+              aria-label="Fechar banner"
+              title="Fechar"
+            >
+              ✕
+            </button>
+          </div>
+        )}
         <p className="auth-card__brand">Tigrinho da Sorte</p>
 
         <div className="tabs" role="tablist" aria-label="Entrar ou criar conta">

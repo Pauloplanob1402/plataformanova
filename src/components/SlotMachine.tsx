@@ -240,16 +240,19 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
         </button>
       </div>
 
-      <div className="paytable">
-        {SYMBOL_TABLE.map((s) => (
-          <div className="paytable__item" key={s.id}>
-            <div className="paytable__icon">
-              <img src={SYMBOL_IMAGES[s.id]} alt={s.name} />
+      <details className="paytable-details">
+        <summary>Ver tabela de prêmios</summary>
+        <div className="paytable">
+          {SYMBOL_TABLE.map((s) => (
+            <div className="paytable__item" key={s.id}>
+              <div className="paytable__icon">
+                <img src={SYMBOL_IMAGES[s.id]} alt={s.name} />
+              </div>
+              <span>{s.wayMultiplier}x /via</span>
             </div>
-            <span>{s.wayMultiplier}x /via</span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </details>
     </div>
   );
 }
