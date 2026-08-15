@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Reel } from './Reel';
-import { REELS, ROWS, SYMBOL_TABLE } from '../core/symbols';
+import { SYMBOL_TABLE } from '../core/symbols';
 import { SYMBOL_IMAGES } from '../symbols/images';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
-import type { SlotGrid } from '../core/waysToWin';
 
 interface SlotMachineProps {
   credits: number;
@@ -15,35 +14,29 @@ interface SlotMachineProps {
   onWin: (amount: number) => void;
 }
 
+const REEL_COUNT = 3;
 const BET_STEPS = [5, 10, 25, 50, 100];
 const TICK_MS = 65;
-const REEL_STOP_DELAYS = [650, 900, 1150]; // ms — cada COLUNA para em sequência
+const REEL_STOP_DELAYS = [600, 820, 1040]; // ms — cada rolo para em sequência
 
-// Durante a ROLAGEM (só efeito visual, antes de cada coluna travar), o tigre
+// Durante a ROLAGEM (só efeito visual, antes de cada rolo travar), o tigre
 // aparece bem mais no "embaralhado" pra criar expectativa. Isso é só estética
-// — o resultado final vem do servidor (spin_slot RPC).
+// do rolo girando — o resultado final vem do servidor (spin_slot RPC).
 const TIGER_TEASE_MULTIPLIER = 9;
 
 const SYMBOL_ID_TO_INDEX = new Map(SYMBOL_TABLE.map((s, i) => [s.id, i]));
 
-function emptyGrid(): SlotGrid {
-  return Array.from({ length: REELS }, () => Array.from({ length: ROWS }, () => 0));
-}
-
 interface SpinRpcResult {
-  /** 9 ids de símbolo, em ordem reel-major: [rolo0-linha0,1,2, rolo1-linha0,1,2, rolo2-linha0,1,2]. */
-  grid: string[];
+  symbols: string[];
   payout: number;
   new_balance: number;
-  winning_symbols: string[];
 }
 
 export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }: SlotMachineProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [spinning, setSpinning] = useState(false);
-  const [displayGrid, setDisplayGrid] = useState<SlotGrid>(emptyGrid());
+  const [displayIndices, setDisplayIndices] = useState<number[]>([0, 1, 2]);
   const [lastPayout, setLastPayout] = useState<number | null>(null);
-  const [winningSymbolIds, setWinningSymbolIds] = useState<string[]>([]);
   const [flash, setFlash] = useState(false);
   const [spinError, setSpinError] = useState<string | null>(null);
 
@@ -56,7 +49,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
   const intervalIdRef = useRef<number | null>(null);
   const timeoutIdsRef = useRef<number[]>([]);
   const reelStoppedRef = useRef<boolean[]>([false, false, false]);
-  const finalGridRef = useRef<SlotGrid>(emptyGrid());
+  const finalResultsRef = useRef<number[]>([0, 1, 2]);
 
   const clearAllTimers = useCallback(() => {
     if (intervalIdRef.current) window.clearInterval(intervalIdRef.current);
@@ -81,14 +74,15 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
   }, []);
 
   const revealFinalResult = useCallback(
-    (payout: number, newBalance: number, winIds: string[]) => {
+    (payout: number, newBalance: number) => {
       reelStoppedRef.current = [false, false, false];
 
-      for (let i = 0; i < REELS; i++) {
+      for (let i = 0; i < REEL_COUNT; i++) {
         const timeoutId = window.setTimeout(() => {
           reelStoppedRef.current[i] = true;
-          setDisplayGrid((prev) => {
-            const next = prev.map((reel, r) => (r === i ? finalGridRef.current[i] : reel));
+          setDisplayIndices((prev) => {
+            const next = [...prev];
+            next[i] = finalResultsRef.current[i];
             return next;
           });
           try {
@@ -112,14 +106,11 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
 
             if (payout > 0) {
               setLastPayout(payout);
-              setWinningSymbolIds(winIds);
               setFlash(true);
               onWin(payout);
               try {
-                const bestSymbol = SYMBOL_TABLE.filter((s) => winIds.includes(s.id)).sort(
-                  (a, b) => b.wayMultiplier - a.wayMultiplier
-                )[0];
-                bestSymbol && bestSymbol.wayMultiplier >= 3.9 ? soundEngine.win(bestSymbol.wayMultiplier) : soundEngine.coin();
+                const symbol = SYMBOL_TABLE[finalResultsRef.current[0]];
+                symbol.payoutMultiplier >= 15 ? soundEngine.win(symbol.payoutMultiplier) : soundEngine.coin();
               } catch {
                 // som nunca deve travar o jogo
               }
@@ -139,7 +130,6 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
 
     setSpinError(null);
     setLastPayout(null);
-    setWinningSymbolIds([]);
     setFlash(false);
     clearAllTimers();
     setSpinning(true);
@@ -153,9 +143,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
 
     // Animação de "embaralhando" começa já, enquanto esperamos a resposta do servidor.
     intervalIdRef.current = window.setInterval(() => {
-      setDisplayGrid((prev) =>
-        prev.map((reel, i) => (reelStoppedRef.current[i] ? reel : reel.map(() => teaseIndex())))
-      );
+      setDisplayIndices((prev) => prev.map((idx, i) => (reelStoppedRef.current[i] ? idx : teaseIndex())));
     }, TICK_MS);
 
     const { data, error } = await supabase.rpc('spin_slot', { bet_amount: betAmount });
@@ -177,13 +165,8 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
     }
 
     const result = data as SpinRpcResult;
-    const flatIndices = result.grid.map((id) => SYMBOL_ID_TO_INDEX.get(id) ?? 0);
-    const grid: SlotGrid = [];
-    for (let r = 0; r < REELS; r++) {
-      grid.push(flatIndices.slice(r * ROWS, r * ROWS + ROWS));
-    }
-    finalGridRef.current = grid;
-    revealFinalResult(result.payout, result.new_balance, result.winning_symbols ?? []);
+    finalResultsRef.current = result.symbols.map((id) => SYMBOL_ID_TO_INDEX.get(id) ?? 0);
+    revealFinalResult(result.payout, result.new_balance);
   }, [spinning, credits, betAmount, clearAllTimers, teaseIndex, revealFinalResult]);
 
   const canDecreaseBet = betIndex > 0 && !spinning;
@@ -193,13 +176,8 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
   return (
     <div className="slot-card">
       <div className={`reel-frame ${flash ? 'reel-frame--win' : ''}`}>
-        {displayGrid.map((reelIndices, i) => (
-          <Reel
-            key={i}
-            symbolIndices={reelIndices}
-            spinning={spinning}
-            winningSymbolIds={winningSymbolIds}
-          />
+        {displayIndices.map((symbolIndex, i) => (
+          <Reel key={i} symbolIndex={symbolIndex} spinning={spinning} />
         ))}
       </div>
 
@@ -208,7 +186,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
           ? spinError
           : lastPayout
             ? `+${lastPayout} créditos!`
-            : 'Alinhe símbolos nos 3 rolos para ganhar — quantas mais repetições, mais vias pagam'}
+            : 'Alinhe 3 símbolos iguais para ganhar'}
       </div>
 
       <div className="controls">
@@ -246,7 +224,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
             <div className="paytable__icon">
               <img src={SYMBOL_IMAGES[s.id]} alt={s.name} />
             </div>
-            <span>{s.wayMultiplier}x /via</span>
+            <span>{s.payoutMultiplier}x</span>
           </div>
         ))}
       </div>

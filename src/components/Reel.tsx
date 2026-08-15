@@ -2,30 +2,23 @@ import { SYMBOL_TABLE } from '../core/symbols';
 import { SYMBOL_IMAGES } from '../symbols/images';
 
 interface ReelProps {
-  /** 3 índices (cima, meio, baixo) em SYMBOL_TABLE. */
-  symbolIndices: number[];
+  symbolIndex: number;
   spinning: boolean;
-  /** ids de símbolos vencedores nesta rodada — usado pra destacar as posições que pagaram. */
-  winningSymbolIds: string[];
 }
 
 /**
- * Uma coluna do slot: mostra 3 posições empilhadas (cima/meio/baixo), como
- * numa grade 3x3 de slot comercial. Componente puramente visual — toda a
- * lógica de giro e avaliação vive no SlotMachine.
+ * Componente puramente visual — só mostra o símbolo que o SlotMachine mandar.
+ * Toda a lógica de giro (intervalos, timeouts, quando parar) fica centralizada
+ * no SlotMachine, evitando bugs de sincronismo entre componentes.
  */
-export function Reel({ symbolIndices, spinning, winningSymbolIds }: ReelProps) {
+export function Reel({ symbolIndex, spinning }: ReelProps) {
+  const symbol = SYMBOL_TABLE[symbolIndex];
+
   return (
-    <div className={`reel-column ${spinning ? 'reel-column--spinning' : ''}`}>
-      {symbolIndices.map((symbolIndex, row) => {
-        const symbol = SYMBOL_TABLE[symbolIndex];
-        const isWinning = !spinning && winningSymbolIds.includes(symbol.id);
-        return (
-          <div key={row} className={`reel-cell ${isWinning ? 'reel-cell--win' : ''}`}>
-            <img src={SYMBOL_IMAGES[symbol.id]} alt={symbol.name} />
-          </div>
-        );
-      })}
+    <div className={`reel ${spinning ? 'reel--spinning' : ''}`}>
+      <div className="reel__symbol">
+        <img src={SYMBOL_IMAGES[symbol.id]} alt={symbol.name} />
+      </div>
     </div>
   );
 }

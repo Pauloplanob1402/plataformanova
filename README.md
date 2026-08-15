@@ -1,25 +1,5 @@
 # Tigrinho da Sorte — Simulador Demonstrativo
 
-## ⚠️ Atualização: sistema de "vias" (grade 3x3)
-
-O jogo migrou de 3 espaços únicos para uma grade **3 rolos x 3 posições**
-(9 espaços), com pagamento por **"ways to win"** — qualquer símbolo que
-aparecer nos 3 rolos (em qualquer altura) paga, multiplicado pela
-quantidade de repetições. É o mesmo padrão usado por slots comerciais como
-o Fortune Tiger.
-
-**Passo obrigatório antes de testar:** aplique a migration
-`supabase/migrations/0003_ways_to_win.sql` no seu projeto Supabase — ela
-substitui a função `spin_slot` para devolver a grade 3x3 em vez de 3
-símbolos únicos. Sem isso, o front-end novo não vai bater com o que o
-banco retorna.
-
-Como aplicar: abra o **SQL Editor** no painel do Supabase, cole o conteúdo
-de `supabase/migrations/0003_ways_to_win.sql`, e rode. (Ou `supabase db
-push` se estiver usando a CLI com as migrations linkadas ao projeto.)
-
----
-
 Simulador de slot + jogo de progressão (Torre) inspirado no clima visual dos
 jogos "tigrinho", com **arte original em SVG** e **sons sintetizados via Web
 Audio API** — nenhum asset de terceiros é usado. Todo o saldo é fictício, sem
