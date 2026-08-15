@@ -3,12 +3,10 @@ import mascoteTigre from '../assets/mascote-tigre.webp';
 interface HUDProps {
   credits: number;
   onReset: () => void;
-  muted: boolean;
-  onToggleMute: () => void;
   onSignOut?: () => void;
 }
 
-export function HUD({ credits, onReset, muted, onToggleMute, onSignOut }: HUDProps) {
+export function HUD({ credits, onReset, onSignOut }: HUDProps) {
   return (
     <header className="hud">
       <div className="hud__brand">
@@ -22,14 +20,6 @@ export function HUD({ credits, onReset, muted, onToggleMute, onSignOut }: HUDPro
           <span className="hud__pill-label">Créditos</span>
           <span className="hud__pill-value">{credits}</span>
         </div>
-        <button
-          className="hud__icon-btn"
-          onClick={onToggleMute}
-          aria-label={muted ? 'Ativar som' : 'Desativar som'}
-          title={muted ? 'Ativar som' : 'Desativar som'}
-        >
-          {muted ? '🔇' : '🔊'}
-        </button>
         <button className="hud__reset" onClick={onReset} title="Sincroniza o saldo com o servidor">
           Sincronizar
         </button>

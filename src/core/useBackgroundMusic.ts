@@ -1,32 +1,33 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 const MUSIC_SRC = '/audio/golden-dragon-dance.mp3';
 const MUSIC_VOLUME = 0.35;
 
 /**
- * Toca a trilha sonora em loop contínuo enquanto o jogo estiver aberto.
+ * Toca a trilha sonora em loop contínuo, sem botão de controle — o volume
+ * fica a cargo do próprio aparelho do usuário (ele abaixa se não quiser).
  *
  * Navegadores bloqueiam áudio COM SOM antes de qualquer interação do usuário
- * (política de autoplay). Por isso: começa mutado e tocando (autoplay
- * silencioso é permitido), e assim que o usuário interage com a página pela
- * primeira vez (clique, toque ou tecla) — inclusive girando o slot — o som
- * é ativado automaticamente. O botão no HUD permite ligar/desligar manualmente.
+ * (política de autoplay). Por isso: tenta tocar com som direto ao abrir a
+ * página; se o navegador bloquear, começa mutado e destrava automaticamente
+ * no primeiríssimo toque/clique/tecla do usuário em qualquer lugar da
+ * página — não precisa ser um botão específico, nem o usuário perceber.
  */
 export function useBackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [muted, setMuted] = useState(true);
   const hasUnlockedRef = useRef(false);
 
   useEffect(() => {
     const audio = new Audio(MUSIC_SRC);
     audio.loop = true;
     audio.volume = MUSIC_VOLUME;
-    audio.muted = true;
     audioRef.current = audio;
 
-    audio.play().catch(() => {
-      // autoplay bloqueado até mesmo mudo em alguns navegadores — sem problema,
-      // vai iniciar na primeira interação do usuário via o listener abaixo.
+    // tenta tocar já com som ligado assim que a página abre
+    audio.play().then(() => {
+      hasUnlockedRef.current = true;
+    }).catch(() => {
+      // bloqueado pelo navegador — vai destravar no primeiro toque abaixo
     });
 
     const unlockOnFirstInteraction = () => {
@@ -34,7 +35,6 @@ export function useBackgroundMusic() {
       hasUnlockedRef.current = true;
       audio.muted = false;
       audio.play().catch(() => {});
-      setMuted(false);
     };
 
     const events: Array<keyof WindowEventMap> = ['pointerdown', 'keydown', 'touchstart'];
@@ -46,21 +46,4 @@ export function useBackgroundMusic() {
       audio.src = '';
     };
   }, []);
-
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (muted) {
-      audio.muted = false;
-      audio.play().catch(() => {});
-      hasUnlockedRef.current = true;
-      setMuted(false);
-    } else {
-      audio.muted = true;
-      setMuted(true);
-    }
-  };
-
-  return { muted, toggleMute };
 }

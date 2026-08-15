@@ -35,7 +35,8 @@ body {
   background-color: var(--void-deep);
   color: var(--parchment);
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+  min-height: 100vh; /* fallback pra navegadores sem suporte a dvh */
+  min-height: 100dvh; /* altura real visível no mobile, ignora a barra do navegador */
 }
 
 /* Em telas estreitas (celular), a imagem widescreen do templo corta mal o
@@ -53,7 +54,8 @@ body {
 .app {
   max-width: 620px;
   margin: 0 auto;
-  min-height: 100vh;
+  min-height: 100vh; /* fallback */
+  min-height: 100dvh; /* acompanha a barra do navegador aparecendo/sumindo no mobile */
   display: flex;
   flex-direction: column;
   padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
@@ -545,6 +547,17 @@ body {
   justify-content: center;
   gap: 16px;
   flex-wrap: wrap;
+  /* gruda na parte de baixo da tela visível (respeitando a área segura do
+     celular) pra nunca ficar escondido atrás da barra de navegação do
+     navegador, mesmo se o conteúdo acima crescer e a página precisar rolar */
+  position: sticky;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 5;
+  padding: 10px;
+  border-radius: 16px;
+  background: rgba(11, 6, 5, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .bet-control {
@@ -624,6 +637,53 @@ body {
   background: transparent;
   border-color: rgba(216, 168, 78, 0.4);
   box-shadow: none;
+}
+
+/* ---------- Depósito PIX ---------- */
+
+.deposit-quick-amounts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.deposit-quick-amounts__btn {
+  width: auto;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-family: var(--font-body);
+}
+
+.deposit-charge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.deposit-charge__qr {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  border: 1px solid rgba(216, 168, 78, 0.3);
+  background: #fff;
+  padding: 8px;
+}
+
+.deposit-charge__code {
+  width: 100%;
+  max-height: 90px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(216, 168, 78, 0.25);
+  border-radius: 10px;
+  padding: 10px;
+  word-break: break-all;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--parchment-dim);
 }
 
 .tower-actions {
