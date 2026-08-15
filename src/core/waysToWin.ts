@@ -1,59 +1,33 @@
-import { REELS, ROWS, SYMBOL_TABLE } from './symbols';
-
-// ⚠️ AVISO DE SEGURANÇA: este módulo é uma referência/protótipo de como
-// avaliar o sistema "ways to win" no client. A implementação REAL que decide
-// pagamentos de verdade vive em supabase/migrations/0003_ways_to_win.sql
-// (função spin_slot, SECURITY DEFINER) — é ela quem manda. Nada aqui debita
-// ou credita nada sozinho. Se algum dia estas funções (evaluateWays/drawGrid)
-// forem usadas pra decidir crédito real sem passar pela função do Postgres,
-// isso reabre o mesmo buraco de segurança que todo o roteiro existe pra evitar.
-
-/** Grade do slot: 3 rolos, cada um com 3 posições (cima/meio/baixo). */
-export type SlotGrid = number[][]; // grid[reelIndex][rowIndex] = índice em SYMBOL_TABLE
-
-export interface WinResult {
-  totalPayout: number;
-  /** ids dos símbolos que pagaram nesta rodada (para destacar na grade). */
-  winningSymbolIds: string[];
+export interface SlotSymbolDef {
+  id: string;
+  name: string;
+  /** Peso relativo de sorteio — maior = mais frequente. */
+  weight: number;
+  /** Multiplicador da aposta quando 3 iguais alinham (payline única, usado pelo jogo atual). */
+  payoutMultiplier: number;
+  /**
+   * Multiplicador usado pelo sistema alternativo "ways to win" (core/waysToWin.ts),
+   * onde vários símbolos podem pagar na mesma rodada em vez de só 1 payline.
+   * Calibrado mais baixo que payoutMultiplier porque paga com mais frequência
+   * (basta o símbolo aparecer em todos os 3 rolos, não precisa ser na mesma linha).
+   */
+  wayMultiplier: number;
 }
+
+/** Dimensões da grade usada pelo sistema "ways to win" (3 rolos x 3 posições). */
+export const REELS = 3;
+export const ROWS = 3;
 
 /**
- * Avalia o sistema "ways to win": para cada símbolo, conta quantas vezes ele
- * aparece em cada rolo. Se aparecer em TODOS os 3 rolos (contagem > 0 em
- * cada um), o número de vias é o produto das contagens, e o pagamento é
- * bet_amount * wayMultiplier * vias. Símbolos diferentes podem pagar na
- * mesma rodada. (Referência — quem decide de verdade é a RPC no Postgres.)
+ * Tabela de símbolos ORIGINAL (arte própria em SVG, sem uso de nenhum asset de
+ * jogo comercial existente). Pesos calibrados para RTP alvo ~95% — ajustável
+ * na ferramenta de calibração (ver core/rtpCalibration.ts).
  */
-export function evaluateWays(grid: SlotGrid, betAmount: number): WinResult {
-  const winningSymbolIds: string[] = [];
-  let totalPayout = 0;
-
-  for (const symbol of SYMBOL_TABLE) {
-    const symbolIndex = SYMBOL_TABLE.indexOf(symbol);
-    const countsPerReel = grid.map((reel) => reel.filter((idx) => idx === symbolIndex).length);
-    const ways = countsPerReel.reduce((a, b) => a * b, 1);
-
-    if (ways > 0) {
-      totalPayout += Math.round(betAmount * symbol.wayMultiplier * ways);
-      winningSymbolIds.push(symbol.id);
-    }
-  }
-
-  return { totalPayout, winningSymbolIds };
-}
-
-/** Sorteia uma grade completa (3 rolos x 3 posições) usando os pesos reais. */
-export function drawGrid(weightedIndex: (weights: number[]) => number): SlotGrid {
-  const weights = SYMBOL_TABLE.map((s) => s.weight);
-  const grid: SlotGrid = [];
-
-  for (let r = 0; r < REELS; r++) {
-    const reel: number[] = [];
-    for (let row = 0; row < ROWS; row++) {
-      reel.push(weightedIndex(weights));
-    }
-    grid.push(reel);
-  }
-
-  return grid;
-}
+export const SYMBOL_TABLE: SlotSymbolDef[] = [
+  { id: 'lantern', name: 'Lanterna', weight: 32, payoutMultiplier: 1.5, wayMultiplier: 0.4 },
+  { id: 'ingot', name: 'Lingote', weight: 24, payoutMultiplier: 2.5, wayMultiplier: 0.7 },
+  { id: 'coin', name: 'Moeda', weight: 20, payoutMultiplier: 4, wayMultiplier: 1.2 },
+  { id: 'firecracker', name: 'Rojão', weight: 14, payoutMultiplier: 7, wayMultiplier: 2.5 },
+  { id: 'bell', name: 'Sino', weight: 7, payoutMultiplier: 15, wayMultiplier: 6 },
+  { id: 'tiger', name: 'Tigre', weight: 3, payoutMultiplier: 45, wayMultiplier: 18 },
+];
