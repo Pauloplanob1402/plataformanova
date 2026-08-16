@@ -8,6 +8,7 @@ import { RedeemCode } from './components/RedeemCode';
 import { ReferralScreen } from './components/ReferralScreen';
 import { VipStatus } from './components/VipStatus';
 import { DepositScreen } from './components/DepositScreen';
+import { WithdrawScreen } from './components/WithdrawScreen';
 import { useProfile } from './core/useProfile';
 import { useSessionStats } from './core/useSessionStats';
 import { useBackgroundMusic } from './core/useBackgroundMusic';
@@ -17,11 +18,12 @@ import './index.css';
 // Vitórias acima desse valor disparam a celebração "grande" (mais moedas, banner maior).
 const BIG_WIN_THRESHOLD = 200;
 
-type Screen = 'jogo' | 'deposito' | 'bonus' | 'codigo' | 'indicacao' | 'vip';
+type Screen = 'jogo' | 'deposito' | 'saque' | 'bonus' | 'codigo' | 'indicacao' | 'vip';
 
 const SCREENS: { id: Screen; label: string }[] = [
   { id: 'jogo', label: '🐯 Jogo' },
   { id: 'deposito', label: '💰 Depósito' },
+  { id: 'saque', label: '🏦 Saque' },
   { id: 'bonus', label: '🎁 Bônus' },
   { id: 'codigo', label: '🎟️ Código' },
   { id: 'indicacao', label: '🤝 Indicação' },
@@ -30,7 +32,7 @@ const SCREENS: { id: Screen; label: string }[] = [
 
 function App() {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { credits, loading: profileLoading, error: profileError, setCreditsLocally, refetch } = useProfile(user);
+  const { credits, kycDone, loading: profileLoading, error: profileError, setCreditsLocally, refetch } = useProfile(user);
   const { recordSpin, resetStats } = useSessionStats();
   useBackgroundMusic();
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
@@ -103,6 +105,14 @@ function App() {
           />
         )}
         {screen === 'deposito' && <DepositScreen user={user} onDeposited={refetch} />}
+        {screen === 'saque' && (
+          <WithdrawScreen
+            user={user}
+            credits={credits ?? 0}
+            kycDone={kycDone}
+            onWithdrawn={setCreditsLocally}
+          />
+        )}
         {screen === 'bonus' && <DailyCheckin user={user} onBalanceChange={setCreditsLocally} />}
         {screen === 'codigo' && <RedeemCode onBalanceChange={setCreditsLocally} />}
         {screen === 'indicacao' && <ReferralScreen user={user} onBalanceChange={setCreditsLocally} />}

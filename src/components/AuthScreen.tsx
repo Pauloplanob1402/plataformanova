@@ -7,6 +7,12 @@ type Method = 'email' | 'phone';
 
 const BANNER_DISMISS_KEY = 'tigrinho:banner-auth-dismissed';
 
+/** Converte telefone em dígitos pro mesmo e-mail interno usado no cadastro. */
+function phoneToFakeEmail(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  return `tel${digits}@long777.phone`;
+}
+
 /** Traduz os erros mais comuns do Supabase Auth para mensagens amigáveis em PT-BR. */
 function translateAuthError(message: string): string {
   const m = message.toLowerCase();
@@ -19,7 +25,6 @@ function translateAuthError(message: string): string {
     return 'Esse e-mail não parece válido.';
   }
   if (m.includes('rate limit')) return 'Muitas tentativas. Aguarde um instante e tente de novo.';
-  if (m.includes('sms')) return 'Não foi possível enviar o SMS agora. Tente entrar por e-mail.';
   return 'Algo deu errado. Tente novamente em instantes.';
 }
 
@@ -70,29 +75,43 @@ export function AuthScreen() {
 
     setLoading(true);
     try {
-      if (method === 'phone' && mode === 'signin' && password.length === 0) {
-        // Login por telefone sem senha => envia OTP por SMS.
-        const { error: otpError } = await supabase.auth.signInWithOtp({ phone });
-        if (otpError) throw otpError;
-        setNotice('Enviamos um código por SMS. Confira seu telefone.');
-        return;
-      }
-
       if (mode === 'signin') {
-        const { error: signInError } = await supabase.auth.signInWithPassword(
-          method === 'email' ? { email, password } : { phone, password },
-        );
-        if (signInError) throw signInError;
+        if (method === 'email') {
+          const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInError) throw signInError;
+        } else {
+          // Telefone: converte pro mesmo e-mail interno fake usado no cadastro
+          // (tel<digitos>@long777.phone) — sem SMS, sem custo.
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: phoneToFakeEmail(phone),
+            password,
+          });
+          if (signInError) throw signInError;
+        }
       } else {
-        const { error: signUpError } = await supabase.auth.signUp(
-          method === 'email' ? { email, password } : { phone, password },
-        );
-        if (signUpError) throw signUpError;
-        setNotice(
-          method === 'email'
-            ? 'Conta criada! Verifique seu e-mail para confirmar o cadastro.'
-            : 'Conta criada! Verifique o SMS para confirmar o cadastro.',
-        );
+        if (method === 'email') {
+          const { error: signUpError } = await supabase.auth.signUp({ email, password });
+          if (signUpError) throw signUpError;
+          setNotice('Conta criada! Verifique seu e-mail para confirmar o cadastro.');
+        } else {
+          // Telefone: cadastro passa pelo backend (api/phone-signup), que usa
+          // a service_role key pra criar a conta já confirmada, sem enviar SMS.
+          const response = await fetch('/api/phone-signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, password }),
+          });
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || 'Não foi possível criar a conta.');
+          }
+          // Conta já nasce confirmada — loga automaticamente em seguida.
+          const { error: signInError } = await supabase.auth.signInWithPassword({
+            email: phoneToFakeEmail(phone),
+            password,
+          });
+          if (signInError) throw signInError;
+        }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -203,10 +222,10 @@ export function AuthScreen() {
           )}
 
           <label className="auth-field">
-            <span>Senha {method === 'phone' && mode === 'signin' ? '(deixe em branco para receber código por SMS)' : ''}</span>
+            <span>Senha</span>
             <input
               type="password"
-              required={!(method === 'phone' && mode === 'signin')}
+              required
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}

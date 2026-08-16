@@ -4,6 +4,7 @@ import { supabase } from './supabaseClient';
 
 export interface UseProfileResult {
   credits: number | null;
+  kycDone: boolean;
   loading: boolean;
   error: string | null;
   /** Atualiza o saldo exibido imediatamente (ex: com o new_balance devolvido por uma RPC),
@@ -19,6 +20,7 @@ export interface UseProfileResult {
  */
 export function useProfile(user: User | null): UseProfileResult {
   const [credits, setCredits] = useState<number | null>(null);
+  const [kycDone, setKycDone] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +32,7 @@ export function useProfile(user: User | null): UseProfileResult {
     }
     const { data, error: fetchError } = await supabase
       .from('profiles')
-      .select('credits')
+      .select('credits, document_number')
       .eq('id', user.id)
       .single();
 
@@ -39,6 +41,7 @@ export function useProfile(user: User | null): UseProfileResult {
     } else {
       setError(null);
       setCredits(data.credits);
+      setKycDone(Boolean(data.document_number));
     }
     setLoading(false);
   }, [user]);
@@ -72,5 +75,5 @@ export function useProfile(user: User | null): UseProfileResult {
     setCredits(value);
   }, []);
 
-  return { credits, loading, error, setCreditsLocally, refetch: fetchProfile };
+  return { credits, kycDone, loading, error, setCreditsLocally, refetch: fetchProfile };
 }

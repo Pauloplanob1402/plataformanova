@@ -1,6 +1,9 @@
 {
   "functions": {
     "api/create-pix.js": { "maxDuration": 15 },
-    "api/webhook.js": { "maxDuration": 15 }
+    "api/webhook.js": { "maxDuration": 15 },
+    "api/process-withdrawal.js": { "maxDuration": 20 },
+    "api/auto-process-withdrawal.js": { "maxDuration": 20 },
+    "api/phone-signup.js": { "maxDuration": 10 }
   }
 }
