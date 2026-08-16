@@ -1,12 +1,14 @@
 import { REELS, ROWS, SYMBOL_TABLE } from './symbols';
 
-// ⚠️ AVISO DE SEGURANÇA: este módulo é uma referência/protótipo de como
-// avaliar o sistema "ways to win" no client. A implementação REAL que decide
-// pagamentos de verdade vive em supabase/migrations/0003_ways_to_win.sql
-// (função spin_slot, SECURITY DEFINER) — é ela quem manda. Nada aqui debita
-// ou credita nada sozinho. Se algum dia estas funções (evaluateWays/drawGrid)
-// forem usadas pra decidir crédito real sem passar pela função do Postgres,
-// isso reabre o mesmo buraco de segurança que todo o roteiro existe pra evitar.
+// ⚠️ ARQUIVO DESATUALIZADO (mantido só pelo tipo SlotGrid, ainda usado em
+// SlotMachine.tsx): este módulo descreve a mecânica antiga "ways to win"
+// (símbolo pagava ao aparecer em cada rolo, sem precisar alinhar). Ela foi
+// TROCADA pela migration 0008_classic_payline.sql por confundir os
+// jogadores — a regra atual é linha clássica (3 iguais na mesma linha
+// horizontal). A implementação REAL que decide pagamentos de verdade vive
+// em supabase/migrations/0008_classic_payline.sql (função spin_slot,
+// SECURITY DEFINER) — é ela quem manda, não este arquivo. As funções
+// evaluateWays/drawGrid abaixo não são mais chamadas por nada no jogo.
 
 /** Grade do slot: 3 rolos, cada um com 3 posições (cima/meio/baixo). */
 export type SlotGrid = number[][]; // grid[reelIndex][rowIndex] = índice em SYMBOL_TABLE

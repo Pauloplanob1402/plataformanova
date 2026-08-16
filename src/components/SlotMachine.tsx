@@ -36,6 +36,8 @@ interface SpinRpcResult {
   payout: number;
   new_balance: number;
   winning_symbols: string[];
+  /** linhas que pagaram nesta rodada: 1=topo, 2=meio, 3=base. */
+  winning_rows: number[];
 }
 
 export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }: SlotMachineProps) {
@@ -43,7 +45,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
   const [spinning, setSpinning] = useState(false);
   const [displayGrid, setDisplayGrid] = useState<SlotGrid>(emptyGrid());
   const [lastPayout, setLastPayout] = useState<number | null>(null);
-  const [winningSymbolIds, setWinningSymbolIds] = useState<string[]>([]);
+  const [winningRows, setWinningRows] = useState<number[]>([]);
   const [flash, setFlash] = useState(false);
   const [spinError, setSpinError] = useState<string | null>(null);
 
@@ -81,7 +83,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
   }, []);
 
   const revealFinalResult = useCallback(
-    (payout: number, newBalance: number, winIds: string[]) => {
+    (payout: number, newBalance: number, winIds: string[], winRows: number[]) => {
       reelStoppedRef.current = [false, false, false];
 
       for (let i = 0; i < REELS; i++) {
@@ -112,14 +114,14 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
 
             if (payout > 0) {
               setLastPayout(payout);
-              setWinningSymbolIds(winIds);
+              setWinningRows(winRows);
               setFlash(true);
               onWin(payout);
               try {
                 const bestSymbol = SYMBOL_TABLE.filter((s) => winIds.includes(s.id)).sort(
-                  (a, b) => b.wayMultiplier - a.wayMultiplier
+                  (a, b) => b.payoutMultiplier - a.payoutMultiplier
                 )[0];
-                bestSymbol && bestSymbol.wayMultiplier >= 3.9 ? soundEngine.win(bestSymbol.wayMultiplier) : soundEngine.coin();
+                bestSymbol && bestSymbol.payoutMultiplier >= 15 ? soundEngine.win(bestSymbol.payoutMultiplier) : soundEngine.coin();
               } catch {
                 // som nunca deve travar o jogo
               }
@@ -139,7 +141,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
 
     setSpinError(null);
     setLastPayout(null);
-    setWinningSymbolIds([]);
+    setWinningRows([]);
     setFlash(false);
     clearAllTimers();
     setSpinning(true);
@@ -183,7 +185,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
       grid.push(flatIndices.slice(r * ROWS, r * ROWS + ROWS));
     }
     finalGridRef.current = grid;
-    revealFinalResult(result.payout, result.new_balance, result.winning_symbols ?? []);
+    revealFinalResult(result.payout, result.new_balance, result.winning_symbols ?? [], result.winning_rows ?? []);
   }, [spinning, credits, betAmount, clearAllTimers, teaseIndex, revealFinalResult]);
 
   const canDecreaseBet = betIndex > 0 && !spinning;
@@ -198,7 +200,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
             key={i}
             symbolIndices={reelIndices}
             spinning={spinning}
-            winningSymbolIds={winningSymbolIds}
+            winningRows={winningRows}
           />
         ))}
       </div>
@@ -208,7 +210,7 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
           ? spinError
           : lastPayout
             ? `+${lastPayout} créditos!`
-            : 'Alinhe símbolos nos 3 rolos para ganhar — quantas mais repetições, mais vias pagam'}
+            : 'Alinhe 3 símbolos iguais numa mesma linha (topo, meio ou base) para ganhar'}
       </div>
 
       <div className="controls">
@@ -242,13 +244,14 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
 
       <details className="paytable-details">
         <summary>Ver tabela de prêmios</summary>
+        <p className="paytable__rule">3 iguais na mesma linha pagam o multiplicador abaixo × valor da aposta.</p>
         <div className="paytable">
           {SYMBOL_TABLE.map((s) => (
             <div className="paytable__item" key={s.id}>
               <div className="paytable__icon">
                 <img src={SYMBOL_IMAGES[s.id]} alt={s.name} />
               </div>
-              <span>{s.wayMultiplier}x /via</span>
+              <span>{s.payoutMultiplier}x</span>
             </div>
           ))}
         </div>
