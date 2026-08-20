@@ -30,6 +30,17 @@ function emptyGrid(): SlotGrid {
   return Array.from({ length: REELS }, () => Array.from({ length: ROWS }, () => 0));
 }
 
+interface SpinFeatureFrame {
+  grid: string[];
+  locked: string;
+}
+
+interface SpinFeatureResult {
+  frames: SpinFeatureFrame[];
+  full_grid: boolean;
+  bonus_multiplier: number | null;
+}
+
 interface SpinRpcResult {
   /** 9 ids de símbolo, em ordem reel-major: [rolo0-linha0,1,2, rolo1-linha0,1,2, rolo2-linha0,1,2]. */
   grid: string[];
@@ -38,7 +49,11 @@ interface SpinRpcResult {
   winning_symbols: string[];
   /** linhas que pagaram nesta rodada: 1=topo, 2=meio, 3=base. */
   winning_rows: number[];
+  /** presente só quando o Respin Dourado disparou nesta rodada. */
+  feature: SpinFeatureResult | null;
 }
+
+const FEATURE_FRAME_DELAY_MS = 700;
 
 export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }: SlotMachineProps) {
   const [betIndex, setBetIndex] = useState(1);
@@ -48,6 +63,8 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
   const [winningRows, setWinningRows] = useState<number[]>([]);
   const [flash, setFlash] = useState(false);
   const [spinError, setSpinError] = useState<string | null>(null);
+  const [lockedSymbolId, setLockedSymbolId] = useState<string | null>(null);
+  const [featureMessage, setFeatureMessage] = useState<string | null>(null);
 
   const betAmount = BET_STEPS[betIndex];
 
@@ -82,8 +99,80 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const settleRound = useCallback(
+    (payout: number, newBalance: number, winIds: string[], winRows: number[], bonusMultiplier: number | null) => {
+      onBalanceChange(newBalance);
+      onSpinResolved(betAmount, payout);
+
+      if (payout > 0) {
+        setLastPayout(payout);
+        setWinningRows(winRows);
+        setFlash(true);
+        onWin(payout);
+        if (bonusMultiplier) {
+          setFeatureMessage(`🐯 GRADE CHEIA! Prêmio multiplicado por ${bonusMultiplier}x!`);
+        }
+        try {
+          const bestSymbol = SYMBOL_TABLE.filter((s) => winIds.includes(s.id)).sort(
+            (a, b) => b.payoutMultiplier - a.payoutMultiplier
+          )[0];
+          bestSymbol && bestSymbol.payoutMultiplier >= 15 ? soundEngine.win(bestSymbol.payoutMultiplier) : soundEngine.coin();
+        } catch {
+          // som nunca deve travar o jogo
+        }
+        window.setTimeout(() => setFlash(false), 900);
+      }
+    },
+    [betAmount, onBalanceChange, onSpinResolved, onWin],
+  );
+
+  /** Anima a sequência de respins do Respin Dourado, quadro a quadro, usando
+   *  os dados já calculados pelo servidor (nada é decidido no client). */
+  const playFeatureFrames = useCallback((feature: SpinFeatureResult): Promise<void> => {
+    return new Promise((resolve) => {
+      const lockedSymbol = SYMBOL_TABLE.find((s) => s.id === feature.frames[0]?.locked);
+      setLockedSymbolId(feature.frames[0]?.locked ?? null);
+      setFeatureMessage(`🔥 Respin Dourado! ${lockedSymbol?.name ?? ''} travado — girando de novo...`);
+
+      let frameIndex = 0;
+      const playNextFrame = () => {
+        const frame = feature.frames[frameIndex];
+        if (!frame) {
+          resolve();
+          return;
+        }
+        const flatIndices = frame.grid.map((id) => SYMBOL_ID_TO_INDEX.get(id) ?? 0);
+        const grid: SlotGrid = [];
+        for (let r = 0; r < REELS; r++) {
+          grid.push(flatIndices.slice(r * ROWS, r * ROWS + ROWS));
+        }
+        setDisplayGrid(grid);
+        try {
+          soundEngine.reelStop();
+        } catch {
+          // ignora falha de áudio
+        }
+        frameIndex += 1;
+        const timeoutId = window.setTimeout(playNextFrame, FEATURE_FRAME_DELAY_MS);
+        timeoutIdsRef.current.push(timeoutId);
+      };
+
+      // primeiro quadro já apareceu na grade normal (é o resultado do giro
+      // inicial) — começa a animação a partir do 2º quadro (1º respin).
+      frameIndex = 1;
+      const timeoutId = window.setTimeout(playNextFrame, FEATURE_FRAME_DELAY_MS);
+      timeoutIdsRef.current.push(timeoutId);
+    });
+  }, []);
+
   const revealFinalResult = useCallback(
-    (payout: number, newBalance: number, winIds: string[], winRows: number[]) => {
+    (
+      payout: number,
+      newBalance: number,
+      winIds: string[],
+      winRows: number[],
+      feature: SpinFeatureResult | null,
+    ) => {
       reelStoppedRef.current = [false, false, false];
 
       for (let i = 0; i < REELS; i++) {
@@ -102,37 +191,38 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
           if (reelStoppedRef.current.every(Boolean)) {
             if (intervalIdRef.current) window.clearInterval(intervalIdRef.current);
             intervalIdRef.current = null;
+
+            if (feature) {
+              // ainda tem o recurso pra animar — mantém "spinning" visualmente
+              // pausado nos rolos finais do giro normal antes de entrar nos respins
+              window.setTimeout(async () => {
+                try {
+                  soundEngine.stopSpinLoop();
+                } catch {
+                  // ignora falha de áudio
+                }
+                await playFeatureFrames(feature);
+                setSpinning(false);
+                setLockedSymbolId(null);
+                if (!feature.full_grid) setFeatureMessage(null);
+                settleRound(payout, newBalance, winIds, winRows, feature.bonus_multiplier);
+              }, 300);
+              return;
+            }
+
             setSpinning(false);
             try {
               soundEngine.stopSpinLoop();
             } catch {
               // ignora falha de áudio
             }
-
-            onBalanceChange(newBalance);
-            onSpinResolved(betAmount, payout);
-
-            if (payout > 0) {
-              setLastPayout(payout);
-              setWinningRows(winRows);
-              setFlash(true);
-              onWin(payout);
-              try {
-                const bestSymbol = SYMBOL_TABLE.filter((s) => winIds.includes(s.id)).sort(
-                  (a, b) => b.payoutMultiplier - a.payoutMultiplier
-                )[0];
-                bestSymbol && bestSymbol.payoutMultiplier >= 15 ? soundEngine.win(bestSymbol.payoutMultiplier) : soundEngine.coin();
-              } catch {
-                // som nunca deve travar o jogo
-              }
-              window.setTimeout(() => setFlash(false), 900);
-            }
+            settleRound(payout, newBalance, winIds, winRows, null);
           }
         }, REEL_STOP_DELAYS[i]);
         timeoutIdsRef.current.push(timeoutId);
       }
     },
-    [betAmount, onBalanceChange, onSpinResolved, onWin]
+    [playFeatureFrames, settleRound],
   );
 
   const handleSpin = useCallback(async () => {
@@ -143,6 +233,8 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
     setLastPayout(null);
     setWinningRows([]);
     setFlash(false);
+    setLockedSymbolId(null);
+    setFeatureMessage(null);
     clearAllTimers();
     setSpinning(true);
 
@@ -185,7 +277,13 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
       grid.push(flatIndices.slice(r * ROWS, r * ROWS + ROWS));
     }
     finalGridRef.current = grid;
-    revealFinalResult(result.payout, result.new_balance, result.winning_symbols ?? [], result.winning_rows ?? []);
+    revealFinalResult(
+      result.payout,
+      result.new_balance,
+      result.winning_symbols ?? [],
+      result.winning_rows ?? [],
+      result.feature ?? null,
+    );
   }, [spinning, credits, betAmount, clearAllTimers, teaseIndex, revealFinalResult]);
 
   const canDecreaseBet = betIndex > 0 && !spinning;
@@ -194,16 +292,19 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
 
   return (
     <div className="slot-card">
-      <div className={`reel-frame ${flash ? 'reel-frame--win' : ''}`}>
+      <div className={`reel-frame ${flash ? 'reel-frame--win' : ''} ${lockedSymbolId ? 'reel-frame--feature' : ''}`}>
         {displayGrid.map((reelIndices, i) => (
           <Reel
             key={i}
             symbolIndices={reelIndices}
-            spinning={spinning}
+            spinning={spinning && !lockedSymbolId}
             winningRows={winningRows}
+            lockedSymbolId={lockedSymbolId}
           />
         ))}
       </div>
+
+      {featureMessage && <div className="feature-banner">{featureMessage}</div>}
 
       <div className="payout-line" aria-live="polite">
         {spinError

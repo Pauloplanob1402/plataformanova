@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { HUD } from './components/HUD';
 import { SlotMachine } from './components/SlotMachine';
+import { HoldWinGame } from './components/HoldWinGame';
+import { DragonTigerGame } from './components/DragonTigerGame';
 import { WinCelebration, type CelebrationData } from './components/WinCelebration';
 import { AuthScreen } from './components/AuthScreen';
 import { DailyCheckin } from './components/DailyCheckin';
@@ -18,10 +20,12 @@ import './index.css';
 // Vitórias acima desse valor disparam a celebração "grande" (mais moedas, banner maior).
 const BIG_WIN_THRESHOLD = 200;
 
-type Screen = 'jogo' | 'deposito' | 'saque' | 'bonus' | 'codigo' | 'indicacao' | 'vip';
+type Screen = 'jogo' | 'moedas' | 'dragaotigre' | 'deposito' | 'saque' | 'bonus' | 'codigo' | 'indicacao' | 'vip';
 
 const SCREENS: { id: Screen; label: string }[] = [
   { id: 'jogo', label: '🐯 Jogo' },
+  { id: 'moedas', label: '🪙 Moedas' },
+  { id: 'dragaotigre', label: '🐉 Dragão x Tigre' },
   { id: 'deposito', label: '💰 Depósito' },
   { id: 'saque', label: '🏦 Saque' },
   { id: 'bonus', label: '🎁 Bônus' },
@@ -103,6 +107,12 @@ function App() {
             onSpinResolved={recordSpin}
             onWin={triggerCelebration}
           />
+        )}
+        {screen === 'moedas' && (
+          <HoldWinGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+        )}
+        {screen === 'dragaotigre' && (
+          <DragonTigerGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
         )}
         {screen === 'deposito' && <DepositScreen user={user} onDeposited={refetch} />}
         {screen === 'saque' && (
