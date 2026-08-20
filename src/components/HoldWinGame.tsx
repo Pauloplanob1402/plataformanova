@@ -138,11 +138,9 @@ export function HoldWinGame({ credits, onBalanceChange, onWin }: HoldWinGameProp
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🪙 Moedas do Tigre</h2>
-      <p className="panel-card__subtitle">
-        6 ou mais moedas na grade ativam o recurso: elas travam e o resto gira de novo até fechar a grade ou as vidas
-        acabarem. O prêmio é a soma de todas as moedas travadas.
-      </p>
+      <h2 className="panel-card__title panel-card__title--icon">
+        <img src={coinImg} alt="" className="panel-card__title-icon" /> Moedas do Tigre
+      </h2>
 
       <div className={`hold-win-grid ${featureActive ? 'hold-win-grid--feature' : ''}`}>
         {cells.map((value, i) => (
@@ -158,7 +156,13 @@ export function HoldWinGame({ credits, onBalanceChange, onWin }: HoldWinGameProp
       </div>
 
       <div className="payout-line" aria-live="polite">
-        {spinError ? spinError : statusMessage ? statusMessage : lastPayout ? `+${lastPayout} créditos!` : ' '}
+        {spinError
+          ? spinError
+          : statusMessage
+            ? statusMessage
+            : lastPayout
+              ? `+${lastPayout} créditos!`
+              : '6 moedas travam na grade — o prêmio é a soma de todas'}
       </div>
 
       <div className="controls">

@@ -22,9 +22,9 @@ interface PlayResult {
 const BET_STEPS = [5, 10, 25, 50, 100];
 
 const BET_OPTIONS: { id: BetType; label: string; payout: string }[] = [
-  { id: 'dragon', label: '🐉 Dragão', payout: '1:1' },
-  { id: 'tie', label: '🤝 Empate', payout: '8:1' },
-  { id: 'tiger', label: '🐯 Tigre', payout: '1:1' },
+  { id: 'dragon', label: '🐉 Dragão', payout: 'ganha 2x' },
+  { id: 'tie', label: '🤝 Empate', payout: 'ganha 9x' },
+  { id: 'tiger', label: '🐯 Tigre', payout: 'ganha 2x' },
 ];
 
 function cardLabel(value: number): string {
@@ -113,44 +113,41 @@ export function DragonTigerGame({ credits, onBalanceChange, onWin }: DragonTiger
   return (
     <div className="panel-card">
       <h2 className="panel-card__title">🐉 Dragão vs Tigre 🐯</h2>
-      <p className="panel-card__subtitle">Duas cartas, um vencedor. Aposte em quem vai tirar o valor mais alto.</p>
 
       <div className="dragon-tiger-table">
-        <div className={`dragon-tiger-card ${winner === 'dragon' ? 'dragon-tiger-card--win' : ''}`}>
+        <div
+          className={`dragon-tiger-card ${winner === 'dragon' ? 'dragon-tiger-card--win' : ''} ${winner && winner !== 'dragon' ? 'dragon-tiger-card--lose' : ''}`}
+        >
           <span className="dragon-tiger-card__label">Dragão</span>
           <div className="dragon-tiger-card__face">{dragonCard ? cardLabel(dragonCard) : '?'}</div>
         </div>
 
         <img src={mascoteTigre} alt="" className="dragon-tiger-table__mascot" />
 
-        <div className={`dragon-tiger-card ${winner === 'tiger' ? 'dragon-tiger-card--win' : ''}`}>
+        <div
+          className={`dragon-tiger-card ${winner === 'tiger' ? 'dragon-tiger-card--win' : ''} ${winner && winner !== 'tiger' ? 'dragon-tiger-card--lose' : ''}`}
+        >
           <span className="dragon-tiger-card__label">Tigre</span>
           <div className="dragon-tiger-card__face">{tigerCard ? cardLabel(tigerCard) : '?'}</div>
         </div>
       </div>
 
       <div className="payout-line" aria-live="polite">
-        {playError
-          ? playError
-          : lastPayout
-            ? `+${lastPayout} créditos!`
-            : winner
-              ? winner === 'tie'
-                ? 'Empate!'
-                : `${winner === 'dragon' ? 'Dragão' : 'Tigre'} venceu`
-              : 'Escolha sua aposta e jogue'}
+        {playError ? playError : lastPayout ? `+${lastPayout} créditos!` : winner === 'tie' ? 'Empate!' : ' '}
       </div>
 
-      <div className="deposit-quick-amounts">
+      <div className="dragon-tiger-bets">
         {BET_OPTIONS.map((opt) => (
           <button
             key={opt.id}
             type="button"
-            className={`bet-btn deposit-quick-amounts__btn ${betType === opt.id ? 'tab--active' : ''}`}
+            className={`dragon-tiger-bet ${betType === opt.id ? 'dragon-tiger-bet--active' : ''}`}
             onClick={() => setBetType(opt.id)}
             disabled={playing}
           >
-            {opt.label} ({opt.payout})
+            {betType === opt.id && <span className="dragon-tiger-bet__check">✓</span>}
+            <span className="dragon-tiger-bet__name">{opt.label}</span>
+            <span className="dragon-tiger-bet__payout">{opt.payout}</span>
           </button>
         ))}
       </div>
