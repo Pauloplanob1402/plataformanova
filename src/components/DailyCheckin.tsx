@@ -7,13 +7,17 @@ interface DailyCheckinProps {
   onBalanceChange: (newBalance: number) => void;
 }
 
-// Mesmo valor fixo usado em supabase/migrations/0002_functions.sql (daily_checkin).
-// Se você mudar lá, mude aqui também — isto é só o texto exibido, o valor de
-// verdade quem decide é o servidor.
-const DISPLAY_REWARD = 50;
-
 function todayUtcIso(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/** Espelha a mesma escala de public.daily_checkin() (0004_vip.sql) — Bronze
+ *  50 / Prata 75 / Ouro 100 — só pra MOSTRAR o valor correto antes de
+ *  resgatar. Quem decide de verdade continua sendo o servidor. */
+function expectedReward(totalWagered: number): number {
+  if (totalWagered >= 5000) return 100;
+  if (totalWagered >= 1000) return 75;
+  return 50;
 }
 
 export function DailyCheckin({ user, onBalanceChange }: DailyCheckinProps) {
@@ -21,22 +25,28 @@ export function DailyCheckin({ user, onBalanceChange }: DailyCheckinProps) {
   const [alreadyDone, setAlreadyDone] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [message, setMessage] = useState<{ text: string; kind: 'ok' | 'error' } | null>(null);
+  const [displayReward, setDisplayReward] = useState(50);
 
   const checkStatus = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('daily_checkins')
-      .select('checkin_date')
-      .eq('user_id', user.id)
-      .order('checkin_date', { ascending: false })
-      .limit(1)
-      .maybeSingle();
 
-    if (!error && data?.checkin_date === todayUtcIso()) {
+    const [{ data: checkinData, error: checkinError }, { data: vipData }] = await Promise.all([
+      supabase
+        .from('daily_checkins')
+        .select('checkin_date')
+        .eq('user_id', user.id)
+        .order('checkin_date', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabase.from('user_vip_status').select('total_wagered').eq('user_id', user.id).maybeSingle(),
+    ]);
+
+    if (!checkinError && checkinData?.checkin_date === todayUtcIso()) {
       setAlreadyDone(true);
     } else {
       setAlreadyDone(false);
     }
+    setDisplayReward(expectedReward(vipData?.total_wagered ?? 0));
     setLoading(false);
   }, [user.id]);
 
@@ -68,7 +78,7 @@ export function DailyCheckin({ user, onBalanceChange }: DailyCheckinProps) {
       <p className="panel-card__subtitle">Volte todo dia e resgate créditos grátis.</p>
 
       <div className="daily-checkin__reward">
-        <span className="daily-checkin__reward-value">+{DISPLAY_REWARD}</span>
+        <span className="daily-checkin__reward-value">+{displayReward}</span>
         <span className="daily-checkin__reward-label">créditos</span>
       </div>
 

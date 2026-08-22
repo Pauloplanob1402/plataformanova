@@ -20,8 +20,8 @@ export function HUD({ credits, onReset, onSignOut }: HUDProps) {
           <span className="hud__pill-label">Créditos</span>
           <span className="hud__pill-value">{credits}</span>
         </div>
-        <button className="hud__reset" onClick={onReset} title="Sincroniza o saldo com o servidor">
-          Sincronizar
+        <button className="hud__icon-btn" onClick={onReset} aria-label="Sincronizar saldo" title="Sincroniza o saldo com o servidor">
+          🔄
         </button>
         {onSignOut && (
           <button className="hud__icon-btn" onClick={onSignOut} aria-label="Sair" title="Sair">
