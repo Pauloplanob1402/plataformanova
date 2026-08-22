@@ -1,0 +1,200 @@
+import { useCallback, useState } from 'react';
+import { soundEngine } from '../sound/soundEngine';
+import { supabase } from '../core/supabaseClient';
+
+interface MinesGameProps {
+  credits: number;
+  onBalanceChange: (newBalance: number) => void;
+  onWin: (amount: number) => void;
+}
+
+const BET_STEPS = [5, 10, 25, 50, 100];
+const MINE_OPTIONS = [3, 5, 8];
+const TOTAL_CELLS = 25;
+
+export function MinesGame({ credits, onBalanceChange, onWin }: MinesGameProps) {
+  const [betIndex, setBetIndex] = useState(1);
+  const [mineCount, setMineCount] = useState(3);
+  const [roundId, setRoundId] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState<Record<number, 'safe' | 'mine'>>({});
+  const [multiplier, setMultiplier] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [gameError, setGameError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const betAmount = BET_STEPS[betIndex];
+  const active = roundId !== null;
+  const picks = Object.values(revealed).filter((v) => v === 'safe').length;
+
+  const handleStart = useCallback(async () => {
+    if (busy || credits < betAmount) return;
+    setBusy(true);
+    setGameError(null);
+    setMessage(null);
+    setRevealed({});
+    setMultiplier(1);
+
+    const { data, error } = await supabase.rpc('start_mines', { bet_amount: betAmount, mine_count: mineCount });
+
+    if (error || !data) {
+      setBusy(false);
+      setGameError(error?.message?.toLowerCase().includes('insuficiente') ? 'Créditos insuficientes.' : 'Não foi possível começar. Tente de novo.');
+      return;
+    }
+
+    onBalanceChange(credits - betAmount);
+    setRoundId(data.round_id);
+    setBusy(false);
+    try {
+      soundEngine.click();
+    } catch {
+      // ignora falha de áudio
+    }
+  }, [betAmount, credits, mineCount, onBalanceChange, busy]);
+
+  const handleReveal = useCallback(
+    async (cellIndex: number) => {
+      if (busy || !roundId || revealed[cellIndex]) return;
+      setBusy(true);
+      setGameError(null);
+
+      const { data, error } = await supabase.rpc('reveal_mines_cell', { round_id: roundId, cell_index: cellIndex });
+
+      if (error || !data) {
+        setBusy(false);
+        setGameError('Não foi possível revelar essa célula. Tente de novo.');
+        return;
+      }
+
+      if (data.busted) {
+        const mineSet: Record<number, 'safe' | 'mine'> = { ...revealed, [cellIndex]: 'mine' };
+        for (const m of data.mine_positions as number[]) mineSet[m] = 'mine';
+        setRevealed(mineSet);
+        setMessage('💥 Explodiu! Rodada perdida.');
+        setRoundId(null);
+        onBalanceChange(data.new_balance);
+        try {
+          soundEngine.reelStop();
+        } catch {
+          // ignora falha de áudio
+        }
+      } else {
+        setRevealed((prev) => ({ ...prev, [cellIndex]: 'safe' }));
+        setMultiplier(data.multiplier);
+        try {
+          soundEngine.coin();
+        } catch {
+          // ignora falha de áudio
+        }
+        if (data.cleared) {
+          setMessage(`🐯 Grade limpa! +${data.payout} créditos!`);
+          setRoundId(null);
+          onBalanceChange(data.new_balance);
+          onWin(data.payout);
+          try {
+            soundEngine.win(data.multiplier);
+          } catch {
+            // ignora falha de áudio
+          }
+        }
+      }
+      setBusy(false);
+    },
+    [busy, revealed, roundId, onBalanceChange, onWin],
+  );
+
+  const handleCashout = useCallback(async () => {
+    if (busy || !roundId || picks < 1) return;
+    setBusy(true);
+    setGameError(null);
+
+    const { data, error } = await supabase.rpc('cashout_mines', { round_id: roundId });
+
+    if (error || !data) {
+      setBusy(false);
+      setGameError('Não foi possível sacar agora. Tente de novo.');
+      return;
+    }
+
+    setMessage(`+${data.payout} créditos!`);
+    setRoundId(null);
+    onBalanceChange(data.new_balance);
+    onWin(data.payout);
+    try {
+      soundEngine.win(multiplier);
+    } catch {
+      // ignora falha de áudio
+    }
+    setBusy(false);
+  }, [busy, roundId, picks, onBalanceChange, onWin, multiplier]);
+
+  const cells = Array.from({ length: TOTAL_CELLS }, (_, i) => i);
+
+  return (
+    <div className="panel-card">
+      <h2 className="panel-card__title">💣 Mina do Tigre</h2>
+
+      {!active && (
+        <div className="deposit-quick-amounts">
+          {MINE_OPTIONS.map((m) => (
+            <button
+              key={m}
+              type="button"
+              className={`bet-btn deposit-quick-amounts__btn ${mineCount === m ? 'tab--active' : ''}`}
+              onClick={() => setMineCount(m)}
+              disabled={busy}
+            >
+              {m} minas
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mines-grid">
+        {cells.map((i) => {
+          const state = revealed[i];
+          return (
+            <button
+              key={i}
+              type="button"
+              className={`mines-cell ${state === 'safe' ? 'mines-cell--safe' : ''} ${state === 'mine' ? 'mines-cell--mine' : ''}`}
+              onClick={() => handleReveal(i)}
+              disabled={!active || busy || Boolean(state)}
+            >
+              {state === 'safe' ? '🐯' : state === 'mine' ? '💣' : ''}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="payout-line" aria-live="polite">
+        {gameError ? gameError : message ? message : active ? `Multiplicador atual: ${multiplier.toFixed(2)}x` : 'Escolha as minas e comece'}
+      </div>
+
+      <div className="controls">
+        <div className="bet-control">
+          <button className="bet-btn" onClick={() => setBetIndex((i) => Math.max(0, i - 1))} disabled={active || busy || betIndex === 0} aria-label="Diminuir aposta">
+            −
+          </button>
+          <div className="bet-amount">
+            <span className="bet-amount__label">Aposta</span>
+            <span className="bet-amount__value">{betAmount}</span>
+          </div>
+          <button className="bet-btn" onClick={() => setBetIndex((i) => Math.min(BET_STEPS.length - 1, i + 1))} disabled={active || busy || betIndex === BET_STEPS.length - 1} aria-label="Aumentar aposta">
+            +
+          </button>
+        </div>
+
+        {!active ? (
+          <button className="spin-btn" onClick={handleStart} disabled={busy || credits < betAmount}>
+            {busy ? 'Iniciando…' : 'Começar'}
+          </button>
+        ) : (
+          <button className="spin-btn spin-btn--secondary" onClick={handleCashout} disabled={busy || picks < 1}>
+            Sacar {picks >= 1 ? `(${multiplier.toFixed(2)}x)` : ''}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

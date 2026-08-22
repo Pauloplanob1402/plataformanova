@@ -15,6 +15,9 @@ import { PlinkoGame } from './components/PlinkoGame';
 import { DuelGame } from './components/DuelGame';
 import { BingoGame } from './components/BingoGame';
 import { RaceGame } from './components/RaceGame';
+import { MinesGame } from './components/MinesGame';
+import { TowerGame } from './components/TowerGame';
+import { HiLoGame } from './components/HiLoGame';
 import { WinCelebration, type CelebrationData } from './components/WinCelebration';
 import { AuthScreen } from './components/AuthScreen';
 import { DailyCheckin } from './components/DailyCheckin';
@@ -48,6 +51,10 @@ type Screen =
   | 'duelo'
   | 'bingo'
   | 'turfe'
+  | 'mina'
+  | 'torre'
+  | 'torremini'
+  | 'sobedesce'
   | 'deposito'
   | 'saque'
   | 'bonus'
@@ -79,6 +86,10 @@ const GAME_SCREENS: { id: Screen; label: string }[] = [
   { id: 'duelo', label: '⚔️ Duelo' },
   { id: 'bingo', label: '🎴 Bingo' },
   { id: 'turfe', label: '🏁 Turfe' },
+  { id: 'mina', label: '💣 Mina' },
+  { id: 'torre', label: '🏯 Torre' },
+  { id: 'torremini', label: '🏯 Torre Mini' },
+  { id: 'sobedesce', label: '📜 Sobe-Desce' },
 ];
 
 const WALLET_SCREENS: { id: Screen; label: string }[] = [
@@ -99,6 +110,7 @@ const SCREEN_SECTION: Record<Screen, Section> = {
   plinko: 'jogos', duelo: 'jogos', bingo: 'jogos', turfe: 'jogos',
   deposito: 'carteira', saque: 'carteira',
   bonus: 'conta', codigo: 'conta', indicacao: 'conta', vip: 'conta',
+  mina: 'jogos', torre: 'jogos', torremini: 'jogos', sobedesce: 'jogos',
 };
 
 function App() {
@@ -272,6 +284,18 @@ function App() {
         )}
         {screen === 'turfe' && (
           <RaceGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+        )}
+        {screen === 'mina' && (
+          <MinesGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+        )}
+        {screen === 'torre' && (
+          <TowerGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+        )}
+        {screen === 'torremini' && (
+          <TowerGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} mini />
+        )}
+        {screen === 'sobedesce' && (
+          <HiLoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
         )}
         {screen === 'deposito' && <DepositScreen user={user} onDeposited={refetch} />}
         {screen === 'saque' && (

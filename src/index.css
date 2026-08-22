@@ -1363,6 +1363,93 @@ body {
   color: var(--parchment-dim);
 }
 
+/* ---------- Mina do Tigre ---------- */
+
+.mines-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.mines-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  border: 1px solid rgba(216, 168, 78, 0.25);
+  background: rgba(21, 11, 8, 0.7);
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mines-cell:disabled {
+  cursor: default;
+}
+
+.mines-cell--safe {
+  border-color: #4ade80;
+  background: radial-gradient(circle at 50% 30%, rgba(74, 222, 128, 0.25), rgba(21, 11, 8, 0.85) 75%);
+}
+
+.mines-cell--mine {
+  border-color: #ef4444;
+  background: radial-gradient(circle at 50% 30%, rgba(239, 68, 68, 0.3), rgba(21, 11, 8, 0.85) 75%);
+}
+
+/* ---------- Torre do Tigre ---------- */
+
+.tower-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.tower-level {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.tower-level--current {
+  opacity: 1;
+}
+
+.tower-level--cleared {
+  opacity: 0.6;
+}
+
+.tower-cell {
+  aspect-ratio: 3 / 1.4;
+  border-radius: 8px;
+  border: 1px solid rgba(216, 168, 78, 0.25);
+  background: rgba(21, 11, 8, 0.7);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tower-cell:disabled {
+  cursor: default;
+}
+
+.tower-cell--safe {
+  border-color: #4ade80;
+  background: radial-gradient(circle at 50% 30%, rgba(74, 222, 128, 0.25), rgba(21, 11, 8, 0.85) 75%);
+}
+
+.tower-cell--mine {
+  border-color: #ef4444;
+  background: radial-gradient(circle at 50% 30%, rgba(239, 68, 68, 0.35), rgba(21, 11, 8, 0.85) 75%);
+}
+
+.tower-cell--reveal-mine {
+  border-color: #ef4444;
+  opacity: 0.7;
+}
+
 /* ---------- Depósito PIX ---------- */
 
 .deposit-quick-amounts {
