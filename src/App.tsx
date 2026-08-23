@@ -18,6 +18,8 @@ import { RaceGame } from './components/RaceGame';
 import { MinesGame } from './components/MinesGame';
 import { TowerGame } from './components/TowerGame';
 import { HiLoGame } from './components/HiLoGame';
+import { RouletteGame } from './components/RouletteGame';
+import { BaccaratGame } from './components/BaccaratGame';
 import { WinCelebration, type CelebrationData } from './components/WinCelebration';
 import { AuthScreen } from './components/AuthScreen';
 import { DailyCheckin } from './components/DailyCheckin';
@@ -55,6 +57,8 @@ type Screen =
   | 'torre'
   | 'torremini'
   | 'sobedesce'
+  | 'roleta'
+  | 'batalha'
   | 'deposito'
   | 'saque'
   | 'bonus'
@@ -90,6 +94,8 @@ const GAME_SCREENS: { id: Screen; label: string }[] = [
   { id: 'torre', label: '🏯 Torre' },
   { id: 'torremini', label: '🏯 Torre Mini' },
   { id: 'sobedesce', label: '📜 Sobe-Desce' },
+  { id: 'roleta', label: '🎡 Roleta' },
+  { id: 'batalha', label: '🀄 Batalha' },
 ];
 
 const WALLET_SCREENS: { id: Screen; label: string }[] = [
@@ -111,6 +117,7 @@ const SCREEN_SECTION: Record<Screen, Section> = {
   deposito: 'carteira', saque: 'carteira',
   bonus: 'conta', codigo: 'conta', indicacao: 'conta', vip: 'conta',
   mina: 'jogos', torre: 'jogos', torremini: 'jogos', sobedesce: 'jogos',
+  roleta: 'jogos', batalha: 'jogos',
 };
 
 function App() {
@@ -296,6 +303,12 @@ function App() {
         )}
         {screen === 'sobedesce' && (
           <HiLoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+        )}
+        {screen === 'roleta' && (
+          <RouletteGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+        )}
+        {screen === 'batalha' && (
+          <BaccaratGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
         )}
         {screen === 'deposito' && <DepositScreen user={user} onDeposited={refetch} />}
         {screen === 'saque' && (
