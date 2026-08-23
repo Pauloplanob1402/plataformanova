@@ -20,6 +20,8 @@ import { TowerGame } from './components/TowerGame';
 import { HiLoGame } from './components/HiLoGame';
 import { RouletteGame } from './components/RouletteGame';
 import { BaccaratGame } from './components/BaccaratGame';
+import { LiveWinsTicker } from './components/LiveWinsTicker';
+import { RankingScreen } from './components/RankingScreen';
 import { WinCelebration, type CelebrationData } from './components/WinCelebration';
 import { AuthScreen } from './components/AuthScreen';
 import { DailyCheckin } from './components/DailyCheckin';
@@ -59,6 +61,7 @@ type Screen =
   | 'sobedesce'
   | 'roleta'
   | 'batalha'
+  | 'ranking'
   | 'deposito'
   | 'saque'
   | 'bonus'
@@ -108,6 +111,7 @@ const ACCOUNT_SCREENS: { id: Screen; label: string }[] = [
   { id: 'codigo', label: '🎟️ Código' },
   { id: 'indicacao', label: '🤝 Indicação' },
   { id: 'vip', label: '👑 VIP' },
+  { id: 'ranking', label: '🏆 Ranking' },
 ];
 
 const SCREEN_SECTION: Record<Screen, Section> = {
@@ -115,7 +119,7 @@ const SCREEN_SECTION: Record<Screen, Section> = {
   bau: 'jogos', dados: 'jogos', moeda: 'jogos', numero: 'jogos', keno: 'jogos', pesca: 'jogos',
   plinko: 'jogos', duelo: 'jogos', bingo: 'jogos', turfe: 'jogos',
   deposito: 'carteira', saque: 'carteira',
-  bonus: 'conta', codigo: 'conta', indicacao: 'conta', vip: 'conta',
+  bonus: 'conta', codigo: 'conta', indicacao: 'conta', vip: 'conta', ranking: 'conta',
   mina: 'jogos', torre: 'jogos', torremini: 'jogos', sobedesce: 'jogos',
   roleta: 'jogos', batalha: 'jogos',
 };
@@ -193,6 +197,8 @@ function App() {
           </div>
         </div>
       )}
+
+      <LiveWinsTicker />
 
       <nav className="section-tabs" role="tablist" aria-label="Seções">
         {SECTION_TABS.map((s) => (
@@ -323,6 +329,7 @@ function App() {
         {screen === 'codigo' && <RedeemCode onBalanceChange={setCreditsLocally} />}
         {screen === 'indicacao' && <ReferralScreen user={user} onBalanceChange={setCreditsLocally} />}
         {screen === 'vip' && <VipStatus user={user} />}
+        {screen === 'ranking' && <RankingScreen />}
       </main>
 
       <WinCelebration data={celebration} />

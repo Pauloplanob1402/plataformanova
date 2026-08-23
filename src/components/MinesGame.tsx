@@ -20,6 +20,7 @@ export function MinesGame({ credits, onBalanceChange, onWin }: MinesGameProps) {
   const [multiplier, setMultiplier] = useState(1);
   const [busy, setBusy] = useState(false);
   const [gameError, setGameError] = useState<string | null>(null);
+  const [stuckRound, setStuckRound] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   const betAmount = BET_STEPS[betIndex];
@@ -38,7 +39,12 @@ export function MinesGame({ credits, onBalanceChange, onWin }: MinesGameProps) {
 
     if (error || !data) {
       setBusy(false);
-      setGameError(error?.message?.toLowerCase().includes('insuficiente') ? 'Créditos insuficientes.' : 'Não foi possível começar. Tente de novo.');
+      if (error?.message?.toLowerCase().includes('rodada em andamento')) {
+        setStuckRound(true);
+        setGameError('Você tem uma rodada travada de uma sessão anterior.');
+      } else {
+        setGameError(error?.message?.toLowerCase().includes('insuficiente') ? 'Créditos insuficientes.' : 'Não foi possível começar. Tente de novo.');
+      }
       return;
     }
 
@@ -51,6 +57,16 @@ export function MinesGame({ credits, onBalanceChange, onWin }: MinesGameProps) {
       // ignora falha de áudio
     }
   }, [betAmount, credits, mineCount, onBalanceChange, busy]);
+
+  const handleCancelStuck = useCallback(async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc('cancel_stuck_round');
+    setBusy(false);
+    if (!error) {
+      setStuckRound(false);
+      setGameError(null);
+    }
+  }, []);
 
   const handleReveal = useCallback(
     async (cellIndex: number) => {
@@ -170,6 +186,12 @@ export function MinesGame({ credits, onBalanceChange, onWin }: MinesGameProps) {
       <div className="payout-line" aria-live="polite">
         {gameError ? gameError : message ? message : active ? `Multiplicador atual: ${multiplier.toFixed(2)}x` : 'Escolha as minas e comece'}
       </div>
+
+      {stuckRound && (
+        <button className="spin-btn spin-btn--secondary" onClick={handleCancelStuck} disabled={busy}>
+          Cancelar rodada travada e recomeçar
+        </button>
+      )}
 
       <div className="controls">
         <div className="bet-control">

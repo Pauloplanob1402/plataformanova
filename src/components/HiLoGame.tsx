@@ -19,6 +19,7 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
   const [busy, setBusy] = useState(false);
   const [gameError, setGameError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [stuckRound, setStuckRound] = useState(false);
 
   const betAmount = BET_STEPS[betIndex];
   const active = roundId !== null;
@@ -35,7 +36,12 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
 
     if (error || !data) {
       setBusy(false);
-      setGameError(error?.message?.toLowerCase().includes('insuficiente') ? 'Créditos insuficientes.' : 'Não foi possível começar. Tente de novo.');
+      if (error?.message?.toLowerCase().includes('rodada em andamento')) {
+        setStuckRound(true);
+        setGameError('Você tem uma rodada travada de uma sessão anterior.');
+      } else {
+        setGameError(error?.message?.toLowerCase().includes('insuficiente') ? 'Créditos insuficientes.' : 'Não foi possível começar. Tente de novo.');
+      }
       return;
     }
 
@@ -49,6 +55,16 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
       // ignora falha de áudio
     }
   }, [betAmount, credits, onBalanceChange, busy]);
+
+  const handleCancelStuck = useCallback(async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc('cancel_stuck_round');
+    setBusy(false);
+    if (!error) {
+      setStuckRound(false);
+      setGameError(null);
+    }
+  }, []);
 
   const handleGuess = useCallback(
     async (direction: 'higher' | 'lower') => {
@@ -131,6 +147,12 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
       <div className="payout-line" aria-live="polite">
         {gameError ? gameError : message ? message : active ? `Sequência: ${streak} · ${multiplier.toFixed(2)}x` : 'A próxima carta vai ser maior ou menor?'}
       </div>
+
+      {stuckRound && (
+        <button className="spin-btn spin-btn--secondary" onClick={handleCancelStuck} disabled={busy}>
+          Cancelar rodada travada e recomeçar
+        </button>
+      )}
 
       {active && (
         <div className="dragon-tiger-bets" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
