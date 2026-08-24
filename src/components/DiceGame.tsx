@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbDados from '../assets/thumb-dados.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -94,7 +95,7 @@ export function DiceGame({ credits, onBalanceChange, onWin }: DiceGameProps) {
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🎲 Dados do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbDados} alt="" className="panel-card__title-icon" /> Dados do Tigre</h2>
 
       <div className="dice-stage">
         <DiceFace value={die1} />

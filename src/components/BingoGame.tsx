@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbBingo from '../assets/thumb-bingo.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -80,7 +81,7 @@ export function BingoGame({ credits, onBalanceChange, onWin }: BingoGameProps) {
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🎴 Bingo do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbBingo} alt="" className="panel-card__title-icon" /> Bingo do Tigre</h2>
 
       <div className="bingo-card">
         {(card ?? Array(25).fill(null)).map((n, i) => {

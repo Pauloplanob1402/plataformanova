@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbTorre from '../assets/thumb-torre.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -154,7 +155,9 @@ export function TowerGame({ credits, onBalanceChange, onWin, mini = false }: Tow
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🏯 {mini ? 'Torre Mini' : 'Torre do Tigre'}</h2>
+      <h2 className="panel-card__title panel-card__title--icon">
+        <img src={thumbTorre} alt="" className="panel-card__title-icon" /> {mini ? 'Torre Mini' : 'Torre do Tigre'}
+      </h2>
 
       <div className="tower-stack">
         {levelRows.map((levelIdx) => {

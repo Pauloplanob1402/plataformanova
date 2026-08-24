@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { SYMBOL_IMAGES } from '../symbols/images';
+import thumbRaspadinha from '../assets/thumb-raspadinha.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -92,7 +93,7 @@ export function ScratchGame({ credits, onBalanceChange, onWin }: ScratchGameProp
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🧾 Raspadinha do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbRaspadinha} alt="" className="panel-card__title-icon" /> Raspadinha do Tigre</h2>
 
       <div className="scratch-grid">
         {grid.map((symbolId, i) => (

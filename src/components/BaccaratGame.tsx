@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbBatalha from '../assets/thumb-batalha.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -89,7 +90,7 @@ export function BaccaratGame({ credits, onBalanceChange, onWin }: BaccaratGamePr
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🀄 Batalha do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbBatalha} alt="" className="panel-card__title-icon" /> Batalha do Tigre</h2>
 
       <div className="dragon-tiger-table">
         <div className={`dragon-tiger-card ${winner === 'player' ? 'dragon-tiger-card--win' : ''} ${winner && winner !== 'player' ? 'dragon-tiger-card--lose' : ''}`}>

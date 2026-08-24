@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbMina from '../assets/thumb-mina.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -148,7 +149,7 @@ export function MinesGame({ credits, onBalanceChange, onWin }: MinesGameProps) {
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">💣 Mina do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbMina} alt="" className="panel-card__title-icon" /> Mina do Tigre</h2>
 
       {!active && (
         <div className="deposit-quick-amounts">

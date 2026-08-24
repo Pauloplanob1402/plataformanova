@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import coinImg from '../assets/symbol-coin.webp';
+import thumbMoeda from '../assets/thumb-moeda.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -84,7 +84,7 @@ export function CoinFlipGame({ credits, onBalanceChange, onWin }: CoinFlipGamePr
   return (
     <div className="panel-card">
       <h2 className="panel-card__title panel-card__title--icon">
-        <img src={coinImg} alt="" className="panel-card__title-icon" /> Moeda do Tigre
+        <img src={thumbMoeda} alt="" className="panel-card__title-icon" /> Moeda do Tigre
       </h2>
 
       <div className={`coin-flip-stage ${flipping ? 'coin-flip-stage--flipping' : ''}`}>

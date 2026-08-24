@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbBau from '../assets/thumb-bau.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -80,7 +81,7 @@ export function ChestGame({ credits, onBalanceChange, onWin }: ChestGameProps) {
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🧧 Baú do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbBau} alt="" className="panel-card__title-icon" /> Baú do Tigre</h2>
 
       <div className="chest-row">
         {[0, 1, 2].map((i) => {

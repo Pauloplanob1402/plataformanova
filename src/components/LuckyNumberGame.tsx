@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbNumero from '../assets/thumb-numero.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -76,7 +77,7 @@ export function LuckyNumberGame({ credits, onBalanceChange, onWin }: LuckyNumber
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🏮 Número da Sorte</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbNumero} alt="" className="panel-card__title-icon" /> Número da Sorte</h2>
 
       <div className="lucky-number-grid">
         {NUMBERS.map((n) => {

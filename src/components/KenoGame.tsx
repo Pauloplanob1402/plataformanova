@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbKeno from '../assets/thumb-keno.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -87,7 +88,7 @@ export function KenoGame({ credits, onBalanceChange, onWin }: KenoGameProps) {
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🎋 Keno do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbKeno} alt="" className="panel-card__title-icon" /> Keno do Tigre</h2>
 
       <div className="keno-grid">
         {NUMBERS.map((n) => {

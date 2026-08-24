@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbDuelo from '../assets/thumb-duelo.webp';
 import mascoteTigre from '../assets/mascote-tigre.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
@@ -81,7 +82,7 @@ export function DuelGame({ credits, onBalanceChange, onWin }: DuelGameProps) {
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">⚔️ Duelo do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbDuelo} alt="" className="panel-card__title-icon" /> Duelo do Tigre</h2>
 
       <div className="dragon-tiger-table">
         <div className={`dragon-tiger-card ${outcome === 'win' ? 'dragon-tiger-card--win' : ''} ${outcome === 'lose' ? 'dragon-tiger-card--lose' : ''}`}>

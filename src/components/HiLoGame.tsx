@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbSobeDesce from '../assets/thumb-sobedesce.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -135,7 +136,7 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">📜 Sobe-Desce do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbSobeDesce} alt="" className="panel-card__title-icon" /> Sobe-Desce do Tigre</h2>
 
       <div className="dragon-tiger-table">
         <div className="dragon-tiger-card">

@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbPlinko from '../assets/thumb-plinko.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -75,7 +76,7 @@ export function PlinkoGame({ credits, onBalanceChange, onWin }: PlinkoGameProps)
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🏮 Plinko do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbPlinko} alt="" className="panel-card__title-icon" /> Plinko do Tigre</h2>
 
       <div className="plinko-slots">
         {SLOT_MULTIPLIERS.map((m, i) => (

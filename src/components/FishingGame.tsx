@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbPesca from '../assets/thumb-pesca.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -74,7 +75,7 @@ export function FishingGame({ credits, onBalanceChange, onWin }: FishingGameProp
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🎣 Pesca do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbPesca} alt="" className="panel-card__title-icon" /> Pesca do Tigre</h2>
 
       <div className={`fishing-pond ${casting ? 'fishing-pond--casting' : ''}`}>
         <div className="fishing-pond__catch">

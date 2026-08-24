@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import coinImg from '../assets/symbol-coin.webp';
+import thumbMoedas from '../assets/thumb-moedas.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -139,7 +140,7 @@ export function HoldWinGame({ credits, onBalanceChange, onWin }: HoldWinGameProp
   return (
     <div className="panel-card">
       <h2 className="panel-card__title panel-card__title--icon">
-        <img src={coinImg} alt="" className="panel-card__title-icon" /> Moedas do Tigre
+        <img src={thumbMoedas} alt="" className="panel-card__title-icon" /> Moedas do Tigre
       </h2>
 
       <div className={`hold-win-grid ${featureActive ? 'hold-win-grid--feature' : ''}`}>

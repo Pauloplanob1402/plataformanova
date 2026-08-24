@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbTurfe from '../assets/thumb-turfe.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -90,7 +91,7 @@ export function RaceGame({ credits, onBalanceChange, onWin }: RaceGameProps) {
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🏁 Turfe do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbTurfe} alt="" className="panel-card__title-icon" /> Turfe do Tigre</h2>
 
       <div className="payout-line" aria-live="polite">
         {playError

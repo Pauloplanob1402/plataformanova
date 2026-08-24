@@ -1,5 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
 import { HUD } from './components/HUD';
+import thumbMoedas from './assets/thumb-moedas.webp';
+import thumbDragaoTigre from './assets/thumb-dragaotigre.webp';
+import thumbRaspadinha from './assets/thumb-raspadinha.webp';
+import thumbBau from './assets/thumb-bau.webp';
+import thumbDados from './assets/thumb-dados.webp';
+import thumbMoeda from './assets/thumb-moeda.webp';
+import thumbNumero from './assets/thumb-numero.webp';
+import thumbKeno from './assets/thumb-keno.webp';
+import thumbPesca from './assets/thumb-pesca.webp';
+import thumbPlinko from './assets/thumb-plinko.webp';
+import thumbDuelo from './assets/thumb-duelo.webp';
+import thumbBingo from './assets/thumb-bingo.webp';
+import thumbTurfe from './assets/thumb-turfe.webp';
+import thumbMina from './assets/thumb-mina.webp';
+import thumbTorre from './assets/thumb-torre.webp';
+import thumbSobeDesce from './assets/thumb-sobedesce.webp';
+import thumbBatalha from './assets/thumb-batalha.webp';
 import { SlotMachine } from './components/SlotMachine';
 import { HoldWinGame } from './components/HoldWinGame';
 import { DragonTigerGame } from './components/DragonTigerGame';
@@ -77,28 +94,28 @@ const SECTION_TABS: { id: Section; label: string }[] = [
   { id: 'conta', label: '🎁 Conta' },
 ];
 
-const GAME_SCREENS: { id: Screen; label: string }[] = [
+const GAME_SCREENS: { id: Screen; label: string; thumb?: string }[] = [
   { id: 'jogo', label: '🐯 Tigrinho' },
-  { id: 'moedas', label: '🪙 Moedas' },
-  { id: 'dragaotigre', label: '🐉 Dragão x Tigre' },
-  { id: 'raspadinha', label: '🧾 Raspadinha' },
+  { id: 'moedas', label: 'Moedas', thumb: thumbMoedas },
+  { id: 'dragaotigre', label: 'Dragão x Tigre', thumb: thumbDragaoTigre },
+  { id: 'raspadinha', label: 'Raspadinha', thumb: thumbRaspadinha },
   { id: 'roda', label: '🎡 Roda' },
-  { id: 'bau', label: '🧧 Baú' },
-  { id: 'dados', label: '🎲 Dados' },
-  { id: 'moeda', label: '🪙 Moeda' },
-  { id: 'numero', label: '🏮 Número' },
-  { id: 'keno', label: '🎋 Keno' },
-  { id: 'pesca', label: '🎣 Pesca' },
-  { id: 'plinko', label: '🏮 Plinko' },
-  { id: 'duelo', label: '⚔️ Duelo' },
-  { id: 'bingo', label: '🎴 Bingo' },
-  { id: 'turfe', label: '🏁 Turfe' },
-  { id: 'mina', label: '💣 Mina' },
-  { id: 'torre', label: '🏯 Torre' },
-  { id: 'torremini', label: '🏯 Torre Mini' },
-  { id: 'sobedesce', label: '📜 Sobe-Desce' },
+  { id: 'bau', label: 'Baú', thumb: thumbBau },
+  { id: 'dados', label: 'Dados', thumb: thumbDados },
+  { id: 'moeda', label: 'Moeda', thumb: thumbMoeda },
+  { id: 'numero', label: 'Número', thumb: thumbNumero },
+  { id: 'keno', label: 'Keno', thumb: thumbKeno },
+  { id: 'pesca', label: 'Pesca', thumb: thumbPesca },
+  { id: 'plinko', label: 'Plinko', thumb: thumbPlinko },
+  { id: 'duelo', label: 'Duelo', thumb: thumbDuelo },
+  { id: 'bingo', label: 'Bingo', thumb: thumbBingo },
+  { id: 'turfe', label: 'Turfe', thumb: thumbTurfe },
+  { id: 'mina', label: 'Mina', thumb: thumbMina },
+  { id: 'torre', label: 'Torre', thumb: thumbTorre },
+  { id: 'torremini', label: 'Torre Mini', thumb: thumbTorre },
+  { id: 'sobedesce', label: 'Sobe-Desce', thumb: thumbSobeDesce },
   { id: 'roleta', label: '🎡 Roleta' },
-  { id: 'batalha', label: '🀄 Batalha' },
+  { id: 'batalha', label: 'Batalha', thumb: thumbBatalha },
 ];
 
 const WALLET_SCREENS: { id: Screen; label: string }[] = [
@@ -217,7 +234,7 @@ function App() {
 
       {section === 'jogos' ? (
         <nav className="game-lobby-grid" role="tablist" aria-label="Jogos">
-          {currentSectionScreens.map((s) => (
+          {GAME_SCREENS.map((s) => (
             <button
               key={s.id}
               type="button"
@@ -226,7 +243,14 @@ function App() {
               className={`game-lobby-card ${screen === s.id ? 'game-lobby-card--active' : ''}`}
               onClick={() => setScreen(s.id)}
             >
-              {s.label}
+              {s.thumb ? (
+                <>
+                  <img src={s.thumb} alt="" className="game-lobby-card__thumb" />
+                  <span>{s.label}</span>
+                </>
+              ) : (
+                s.label
+              )}
             </button>
           ))}
         </nav>

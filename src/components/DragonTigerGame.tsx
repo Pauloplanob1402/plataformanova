@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import mascoteTigre from '../assets/mascote-tigre.webp';
+import thumbDragaoTigre from '../assets/thumb-dragaotigre.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -108,7 +109,9 @@ export function DragonTigerGame({ credits, onBalanceChange, onWin }: DragonTiger
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🐉 Dragão vs Tigre 🐯</h2>
+      <h2 className="panel-card__title panel-card__title--icon">
+        <img src={thumbDragaoTigre} alt="" className="panel-card__title-icon" /> Dragão vs Tigre
+      </h2>
 
       <div className="dragon-tiger-table">
         <div
