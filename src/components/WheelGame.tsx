@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbRoda from '../assets/thumb-roda.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -76,7 +77,7 @@ export function WheelGame({ credits, onBalanceChange, onWin }: WheelGameProps) {
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🎡 Roda da Sorte do Tigre</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbRoda} alt="" className="panel-card__title-icon" /> Roda da Sorte do Tigre</h2>
 
       <div className={`wheel-stage ${spinning ? 'wheel-stage--spinning' : ''}`}>
         <div className="wheel-disc">

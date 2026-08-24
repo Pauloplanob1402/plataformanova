@@ -17,6 +17,8 @@ import thumbMina from './assets/thumb-mina.webp';
 import thumbTorre from './assets/thumb-torre.webp';
 import thumbSobeDesce from './assets/thumb-sobedesce.webp';
 import thumbBatalha from './assets/thumb-batalha.webp';
+import thumbRoda from './assets/thumb-roda.webp';
+import thumbRoleta from './assets/thumb-roleta.webp';
 import { SlotMachine } from './components/SlotMachine';
 import { HoldWinGame } from './components/HoldWinGame';
 import { DragonTigerGame } from './components/DragonTigerGame';
@@ -99,7 +101,7 @@ const GAME_SCREENS: { id: Screen; label: string; thumb?: string }[] = [
   { id: 'moedas', label: 'Moedas', thumb: thumbMoedas },
   { id: 'dragaotigre', label: 'Dragão x Tigre', thumb: thumbDragaoTigre },
   { id: 'raspadinha', label: 'Raspadinha', thumb: thumbRaspadinha },
-  { id: 'roda', label: '🎡 Roda' },
+  { id: 'roda', label: 'Roda', thumb: thumbRoda },
   { id: 'bau', label: 'Baú', thumb: thumbBau },
   { id: 'dados', label: 'Dados', thumb: thumbDados },
   { id: 'moeda', label: 'Moeda', thumb: thumbMoeda },
@@ -114,7 +116,7 @@ const GAME_SCREENS: { id: Screen; label: string; thumb?: string }[] = [
   { id: 'torre', label: 'Torre', thumb: thumbTorre },
   { id: 'torremini', label: 'Torre Mini', thumb: thumbTorre },
   { id: 'sobedesce', label: 'Sobe-Desce', thumb: thumbSobeDesce },
-  { id: 'roleta', label: '🎡 Roleta' },
+  { id: 'roleta', label: 'Roleta', thumb: thumbRoleta },
   { id: 'batalha', label: 'Batalha', thumb: thumbBatalha },
 ];
 

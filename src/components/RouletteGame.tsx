@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import thumbRoleta from '../assets/thumb-roleta.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -91,7 +92,7 @@ export function RouletteGame({ credits, onBalanceChange, onWin }: RouletteGamePr
 
   return (
     <div className="panel-card">
-      <h2 className="panel-card__title">🎡 Roleta da Fortuna</h2>
+      <h2 className="panel-card__title panel-card__title--icon"><img src={thumbRoleta} alt="" className="panel-card__title-icon" /> Roleta da Fortuna</h2>
 
       <div className={`roulette-result ${spinning ? 'roulette-result--spinning' : ''}`}>
         <div className={`roulette-result__ball ${result ? `roulette-result__ball--${result.color}` : ''}`}>
