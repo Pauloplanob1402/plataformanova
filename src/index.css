@@ -474,6 +474,51 @@ body {
   text-align: left;
 }
 
+.game-banner--wide {
+  position: relative;
+  padding: 0;
+  aspect-ratio: 3 / 1;
+  overflow: hidden;
+  background: none;
+}
+
+.game-banner__art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.game-banner__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  padding-right: 6%;
+  text-align: right;
+}
+
+.game-banner--wide .game-banner__label {
+  font-size: clamp(16px, 4.5vw, 22px);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 0, 0, 0.4);
+}
+
+.game-banner--wide .game-banner__play {
+  font-size: clamp(11px, 3vw, 13px);
+  background: rgba(21, 11, 8, 0.55);
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(242, 200, 121, 0.5);
+}
+
+.game-banner--wide:hover .game-banner__art,
+.game-banner--wide:active .game-banner__art {
+  filter: brightness(1.08);
+}
+
 .game-banner:hover,
 .game-banner:active {
   border-color: var(--gold-bright);

@@ -19,6 +19,22 @@ import thumbSobeDesce from './assets/thumb-sobedesce-sm.webp';
 import thumbBatalha from './assets/thumb-batalha-sm.webp';
 import thumbRoda from './assets/thumb-roda-sm.webp';
 import thumbRoleta from './assets/thumb-roleta-sm.webp';
+import bannerBatalha from './assets/banner-batalha.webp';
+import bannerSobeDesce from './assets/banner-sobedesce.webp';
+import bannerMina from './assets/banner-mina.webp';
+import bannerTorre from './assets/banner-torre.webp';
+import bannerTurfe from './assets/banner-turfe.webp';
+import bannerDuelo from './assets/banner-duelo.webp';
+import bannerPlinko from './assets/banner-plinko.webp';
+import bannerPesca from './assets/banner-pesca.webp';
+import bannerKeno from './assets/banner-keno.webp';
+import bannerNumero from './assets/banner-numero.webp';
+import bannerMoeda from './assets/banner-moeda.webp';
+import bannerDados from './assets/banner-dados.webp';
+import bannerBau from './assets/banner-bau.webp';
+import bannerRaspadinha from './assets/banner-raspadinha.webp';
+import bannerDragaoTigre from './assets/banner-dragaotigre.webp';
+import bannerMoedas from './assets/banner-moedas.webp';
 import mascoteTigre from './assets/mascote-tigre.webp';
 
 // Cada jogo só baixa o próprio código quando o jogador realmente abre ele —
@@ -101,28 +117,28 @@ const SECTION_TABS: { id: Section; label: string }[] = [
   { id: 'conta', label: '🎁 Conta' },
 ];
 
-const GAME_SCREENS: { id: Screen; label: string; thumb?: string }[] = [
+const GAME_SCREENS: { id: Screen; label: string; thumb?: string; banner?: string }[] = [
   { id: 'jogo', label: '🐯 Tigrinho' },
-  { id: 'moedas', label: 'Moedas', thumb: thumbMoedas },
-  { id: 'dragaotigre', label: 'Dragão x Tigre', thumb: thumbDragaoTigre },
-  { id: 'raspadinha', label: 'Raspadinha', thumb: thumbRaspadinha },
+  { id: 'moedas', label: 'Moedas', thumb: thumbMoedas, banner: bannerMoedas },
+  { id: 'dragaotigre', label: 'Dragão x Tigre', thumb: thumbDragaoTigre, banner: bannerDragaoTigre },
+  { id: 'raspadinha', label: 'Raspadinha', thumb: thumbRaspadinha, banner: bannerRaspadinha },
   { id: 'roda', label: 'Roda', thumb: thumbRoda },
-  { id: 'bau', label: 'Baú', thumb: thumbBau },
-  { id: 'dados', label: 'Dados', thumb: thumbDados },
-  { id: 'moeda', label: 'Moeda', thumb: thumbMoeda },
-  { id: 'numero', label: 'Número', thumb: thumbNumero },
-  { id: 'keno', label: 'Keno', thumb: thumbKeno },
-  { id: 'pesca', label: 'Pesca', thumb: thumbPesca },
-  { id: 'plinko', label: 'Plinko', thumb: thumbPlinko },
-  { id: 'duelo', label: 'Duelo', thumb: thumbDuelo },
+  { id: 'bau', label: 'Baú', thumb: thumbBau, banner: bannerBau },
+  { id: 'dados', label: 'Dados', thumb: thumbDados, banner: bannerDados },
+  { id: 'moeda', label: 'Moeda', thumb: thumbMoeda, banner: bannerMoeda },
+  { id: 'numero', label: 'Número', thumb: thumbNumero, banner: bannerNumero },
+  { id: 'keno', label: 'Keno', thumb: thumbKeno, banner: bannerKeno },
+  { id: 'pesca', label: 'Pesca', thumb: thumbPesca, banner: bannerPesca },
+  { id: 'plinko', label: 'Plinko', thumb: thumbPlinko, banner: bannerPlinko },
+  { id: 'duelo', label: 'Duelo', thumb: thumbDuelo, banner: bannerDuelo },
   { id: 'bingo', label: 'Bingo', thumb: thumbBingo },
-  { id: 'turfe', label: 'Turfe', thumb: thumbTurfe },
-  { id: 'mina', label: 'Mina', thumb: thumbMina },
-  { id: 'torre', label: 'Torre', thumb: thumbTorre },
-  { id: 'torremini', label: 'Torre Mini', thumb: thumbTorre },
-  { id: 'sobedesce', label: 'Sobe-Desce', thumb: thumbSobeDesce },
+  { id: 'turfe', label: 'Turfe', thumb: thumbTurfe, banner: bannerTurfe },
+  { id: 'mina', label: 'Mina', thumb: thumbMina, banner: bannerMina },
+  { id: 'torre', label: 'Torre', thumb: thumbTorre, banner: bannerTorre },
+  { id: 'torremini', label: 'Torre Mini', thumb: thumbTorre, banner: bannerTorre },
+  { id: 'sobedesce', label: 'Sobe-Desce', thumb: thumbSobeDesce, banner: bannerSobeDesce },
   { id: 'roleta', label: 'Roleta', thumb: thumbRoleta },
-  { id: 'batalha', label: 'Batalha', thumb: thumbBatalha },
+  { id: 'batalha', label: 'Batalha', thumb: thumbBatalha, banner: bannerBatalha },
 ];
 
 const WALLET_SCREENS: { id: Screen; label: string }[] = [
@@ -248,19 +264,35 @@ function App() {
 
       {section === 'jogos' && !gameOpen ? (
         <nav className="game-lobby-list" role="tablist" aria-label="Jogos">
-          {GAME_SCREENS.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              role="tab"
-              className="game-banner"
-              onClick={() => openGame(s.id)}
-            >
-              <img src={s.thumb ?? mascoteTigre} alt="" className="game-banner__thumb" loading="lazy" decoding="async" />
-              <span className="game-banner__label">{s.label}</span>
-              <span className="game-banner__play">Jogar ▶</span>
-            </button>
-          ))}
+          {GAME_SCREENS.map((s) =>
+            s.banner ? (
+              <button
+                key={s.id}
+                type="button"
+                role="tab"
+                className="game-banner game-banner--wide"
+                onClick={() => openGame(s.id)}
+              >
+                <img src={s.banner} alt="" className="game-banner__art" loading="lazy" decoding="async" />
+                <span className="game-banner__overlay">
+                  <span className="game-banner__label">{s.label}</span>
+                  <span className="game-banner__play">Jogar ▶</span>
+                </span>
+              </button>
+            ) : (
+              <button
+                key={s.id}
+                type="button"
+                role="tab"
+                className="game-banner"
+                onClick={() => openGame(s.id)}
+              >
+                <img src={s.thumb ?? mascoteTigre} alt="" className="game-banner__thumb" loading="lazy" decoding="async" />
+                <span className="game-banner__label">{s.label}</span>
+                <span className="game-banner__play">Jogar ▶</span>
+              </button>
+            ),
+          )}
         </nav>
       ) : section === 'jogos' && gameOpen ? (
         <button type="button" className="game-back-btn" onClick={() => setGameOpen(false)}>
