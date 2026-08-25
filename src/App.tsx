@@ -1,54 +1,59 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { HUD } from './components/HUD';
-import thumbMoedas from './assets/thumb-moedas.webp';
-import thumbDragaoTigre from './assets/thumb-dragaotigre.webp';
-import thumbRaspadinha from './assets/thumb-raspadinha.webp';
-import thumbBau from './assets/thumb-bau.webp';
-import thumbDados from './assets/thumb-dados.webp';
-import thumbMoeda from './assets/thumb-moeda.webp';
-import thumbNumero from './assets/thumb-numero.webp';
-import thumbKeno from './assets/thumb-keno.webp';
-import thumbPesca from './assets/thumb-pesca.webp';
-import thumbPlinko from './assets/thumb-plinko.webp';
-import thumbDuelo from './assets/thumb-duelo.webp';
-import thumbBingo from './assets/thumb-bingo.webp';
-import thumbTurfe from './assets/thumb-turfe.webp';
-import thumbMina from './assets/thumb-mina.webp';
-import thumbTorre from './assets/thumb-torre.webp';
-import thumbSobeDesce from './assets/thumb-sobedesce.webp';
-import thumbBatalha from './assets/thumb-batalha.webp';
-import thumbRoda from './assets/thumb-roda.webp';
-import thumbRoleta from './assets/thumb-roleta.webp';
-import { SlotMachine } from './components/SlotMachine';
-import { HoldWinGame } from './components/HoldWinGame';
-import { DragonTigerGame } from './components/DragonTigerGame';
-import { CoinFlipGame } from './components/CoinFlipGame';
-import { LuckyNumberGame } from './components/LuckyNumberGame';
-import { WheelGame } from './components/WheelGame';
-import { DiceGame } from './components/DiceGame';
-import { ChestGame } from './components/ChestGame';
-import { ScratchGame } from './components/ScratchGame';
-import { KenoGame } from './components/KenoGame';
-import { FishingGame } from './components/FishingGame';
-import { PlinkoGame } from './components/PlinkoGame';
-import { DuelGame } from './components/DuelGame';
-import { BingoGame } from './components/BingoGame';
-import { RaceGame } from './components/RaceGame';
-import { MinesGame } from './components/MinesGame';
-import { TowerGame } from './components/TowerGame';
-import { HiLoGame } from './components/HiLoGame';
-import { RouletteGame } from './components/RouletteGame';
-import { BaccaratGame } from './components/BaccaratGame';
+import thumbMoedas from './assets/thumb-moedas-sm.webp';
+import thumbDragaoTigre from './assets/thumb-dragaotigre-sm.webp';
+import thumbRaspadinha from './assets/thumb-raspadinha-sm.webp';
+import thumbBau from './assets/thumb-bau-sm.webp';
+import thumbDados from './assets/thumb-dados-sm.webp';
+import thumbMoeda from './assets/thumb-moeda-sm.webp';
+import thumbNumero from './assets/thumb-numero-sm.webp';
+import thumbKeno from './assets/thumb-keno-sm.webp';
+import thumbPesca from './assets/thumb-pesca-sm.webp';
+import thumbPlinko from './assets/thumb-plinko-sm.webp';
+import thumbDuelo from './assets/thumb-duelo-sm.webp';
+import thumbBingo from './assets/thumb-bingo-sm.webp';
+import thumbTurfe from './assets/thumb-turfe-sm.webp';
+import thumbMina from './assets/thumb-mina-sm.webp';
+import thumbTorre from './assets/thumb-torre-sm.webp';
+import thumbSobeDesce from './assets/thumb-sobedesce-sm.webp';
+import thumbBatalha from './assets/thumb-batalha-sm.webp';
+import thumbRoda from './assets/thumb-roda-sm.webp';
+import thumbRoleta from './assets/thumb-roleta-sm.webp';
+import mascoteTigre from './assets/mascote-tigre.webp';
+
+// Cada jogo só baixa o próprio código quando o jogador realmente abre ele —
+// em vez de carregar os 19 juntos na página inicial (que era o gargalo de
+// carregamento no celular).
+const SlotMachine = lazy(() => import('./components/SlotMachine').then((m) => ({ default: m.SlotMachine })));
+const HoldWinGame = lazy(() => import('./components/HoldWinGame').then((m) => ({ default: m.HoldWinGame })));
+const DragonTigerGame = lazy(() => import('./components/DragonTigerGame').then((m) => ({ default: m.DragonTigerGame })));
+const CoinFlipGame = lazy(() => import('./components/CoinFlipGame').then((m) => ({ default: m.CoinFlipGame })));
+const LuckyNumberGame = lazy(() => import('./components/LuckyNumberGame').then((m) => ({ default: m.LuckyNumberGame })));
+const WheelGame = lazy(() => import('./components/WheelGame').then((m) => ({ default: m.WheelGame })));
+const DiceGame = lazy(() => import('./components/DiceGame').then((m) => ({ default: m.DiceGame })));
+const ChestGame = lazy(() => import('./components/ChestGame').then((m) => ({ default: m.ChestGame })));
+const ScratchGame = lazy(() => import('./components/ScratchGame').then((m) => ({ default: m.ScratchGame })));
+const KenoGame = lazy(() => import('./components/KenoGame').then((m) => ({ default: m.KenoGame })));
+const FishingGame = lazy(() => import('./components/FishingGame').then((m) => ({ default: m.FishingGame })));
+const PlinkoGame = lazy(() => import('./components/PlinkoGame').then((m) => ({ default: m.PlinkoGame })));
+const DuelGame = lazy(() => import('./components/DuelGame').then((m) => ({ default: m.DuelGame })));
+const BingoGame = lazy(() => import('./components/BingoGame').then((m) => ({ default: m.BingoGame })));
+const RaceGame = lazy(() => import('./components/RaceGame').then((m) => ({ default: m.RaceGame })));
+const MinesGame = lazy(() => import('./components/MinesGame').then((m) => ({ default: m.MinesGame })));
+const TowerGame = lazy(() => import('./components/TowerGame').then((m) => ({ default: m.TowerGame })));
+const HiLoGame = lazy(() => import('./components/HiLoGame').then((m) => ({ default: m.HiLoGame })));
+const RouletteGame = lazy(() => import('./components/RouletteGame').then((m) => ({ default: m.RouletteGame })));
+const BaccaratGame = lazy(() => import('./components/BaccaratGame').then((m) => ({ default: m.BaccaratGame })));
 import { LiveWinsTicker } from './components/LiveWinsTicker';
-import { RankingScreen } from './components/RankingScreen';
+const RankingScreen = lazy(() => import('./components/RankingScreen').then((m) => ({ default: m.RankingScreen })));
 import { WinCelebration, type CelebrationData } from './components/WinCelebration';
 import { AuthScreen } from './components/AuthScreen';
-import { DailyCheckin } from './components/DailyCheckin';
-import { RedeemCode } from './components/RedeemCode';
-import { ReferralScreen } from './components/ReferralScreen';
-import { VipStatus } from './components/VipStatus';
-import { DepositScreen } from './components/DepositScreen';
-import { WithdrawScreen } from './components/WithdrawScreen';
+const DailyCheckin = lazy(() => import('./components/DailyCheckin').then((m) => ({ default: m.DailyCheckin })));
+const RedeemCode = lazy(() => import('./components/RedeemCode').then((m) => ({ default: m.RedeemCode })));
+const ReferralScreen = lazy(() => import('./components/ReferralScreen').then((m) => ({ default: m.ReferralScreen })));
+const VipStatus = lazy(() => import('./components/VipStatus').then((m) => ({ default: m.VipStatus })));
+const DepositScreen = lazy(() => import('./components/DepositScreen').then((m) => ({ default: m.DepositScreen })));
+const WithdrawScreen = lazy(() => import('./components/WithdrawScreen').then((m) => ({ default: m.WithdrawScreen })));
 import { useProfile } from './core/useProfile';
 import { useSessionStats } from './core/useSessionStats';
 import { useBackgroundMusic } from './core/useBackgroundMusic';
@@ -150,12 +155,19 @@ function App() {
   useBackgroundMusic();
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
   const [screen, setScreen] = useState<Screen>('jogo');
+  const [gameOpen, setGameOpen] = useState(false);
   const section = SCREEN_SECTION[screen];
 
   const goToSection = useCallback((s: Section) => {
+    setGameOpen(false);
     if (s === 'jogos') setScreen('jogo');
     else if (s === 'carteira') setScreen('deposito');
     else setScreen('bonus');
+  }, []);
+
+  const openGame = useCallback((id: Screen) => {
+    setScreen(id);
+    setGameOpen(true);
   }, []);
 
   const currentSectionScreens =
@@ -234,28 +246,26 @@ function App() {
         ))}
       </nav>
 
-      {section === 'jogos' ? (
-        <nav className="game-lobby-grid" role="tablist" aria-label="Jogos">
+      {section === 'jogos' && !gameOpen ? (
+        <nav className="game-lobby-list" role="tablist" aria-label="Jogos">
           {GAME_SCREENS.map((s) => (
             <button
               key={s.id}
               type="button"
               role="tab"
-              aria-selected={screen === s.id}
-              className={`game-lobby-card ${screen === s.id ? 'game-lobby-card--active' : ''}`}
-              onClick={() => setScreen(s.id)}
+              className="game-banner"
+              onClick={() => openGame(s.id)}
             >
-              {s.thumb ? (
-                <>
-                  <img src={s.thumb} alt="" className="game-lobby-card__thumb" />
-                  <span>{s.label}</span>
-                </>
-              ) : (
-                s.label
-              )}
+              <img src={s.thumb ?? mascoteTigre} alt="" className="game-banner__thumb" loading="lazy" decoding="async" />
+              <span className="game-banner__label">{s.label}</span>
+              <span className="game-banner__play">Jogar ▶</span>
             </button>
           ))}
         </nav>
+      ) : section === 'jogos' && gameOpen ? (
+        <button type="button" className="game-back-btn" onClick={() => setGameOpen(false)}>
+          ← Voltar aos jogos
+        </button>
       ) : (
         <nav className="nav-tabs" role="tablist" aria-label={section === 'carteira' ? 'Carteira' : 'Conta'}>
           {currentSectionScreens.map((s) => (
@@ -273,6 +283,8 @@ function App() {
         </nav>
       )}
 
+      <Suspense fallback={<div className="game-loading"><img src={mascoteTigre} alt="" className="game-loading__mascot" /><span>Carregando...</span></div>}>
+      {(section !== 'jogos' || gameOpen) && (
       <main className="main">
         {screen === 'jogo' && (
           <SlotMachine
@@ -357,6 +369,8 @@ function App() {
         {screen === 'vip' && <VipStatus user={user} />}
         {screen === 'ranking' && <RankingScreen />}
       </main>
+      )}
+      </Suspense>
 
       <WinCelebration data={celebration} />
     </div>
