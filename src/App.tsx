@@ -35,6 +35,10 @@ import bannerBau from './assets/banner-bau.webp';
 import bannerRaspadinha from './assets/banner-raspadinha.webp';
 import bannerDragaoTigre from './assets/banner-dragaotigre.webp';
 import bannerMoedas from './assets/banner-moedas.webp';
+import bannerTigrinho from './assets/banner-tigrinho.webp';
+import bannerRoda from './assets/banner-roda.webp';
+import bannerRoleta from './assets/banner-roleta.webp';
+import bannerBingo from './assets/banner-bingo.webp';
 import mascoteTigre from './assets/mascote-tigre.webp';
 
 // Cada jogo só baixa o próprio código quando o jogador realmente abre ele —
@@ -118,11 +122,11 @@ const SECTION_TABS: { id: Section; label: string }[] = [
 ];
 
 const GAME_SCREENS: { id: Screen; label: string; thumb?: string; banner?: string }[] = [
-  { id: 'jogo', label: '🐯 Tigrinho' },
+  { id: 'jogo', label: '🐯 Tigrinho', banner: bannerTigrinho },
   { id: 'moedas', label: 'Moedas', thumb: thumbMoedas, banner: bannerMoedas },
   { id: 'dragaotigre', label: 'Dragão x Tigre', thumb: thumbDragaoTigre, banner: bannerDragaoTigre },
   { id: 'raspadinha', label: 'Raspadinha', thumb: thumbRaspadinha, banner: bannerRaspadinha },
-  { id: 'roda', label: 'Roda', thumb: thumbRoda },
+  { id: 'roda', label: 'Roda', thumb: thumbRoda, banner: bannerRoda },
   { id: 'bau', label: 'Baú', thumb: thumbBau, banner: bannerBau },
   { id: 'dados', label: 'Dados', thumb: thumbDados, banner: bannerDados },
   { id: 'moeda', label: 'Moeda', thumb: thumbMoeda, banner: bannerMoeda },
@@ -131,13 +135,13 @@ const GAME_SCREENS: { id: Screen; label: string; thumb?: string; banner?: string
   { id: 'pesca', label: 'Pesca', thumb: thumbPesca, banner: bannerPesca },
   { id: 'plinko', label: 'Plinko', thumb: thumbPlinko, banner: bannerPlinko },
   { id: 'duelo', label: 'Duelo', thumb: thumbDuelo, banner: bannerDuelo },
-  { id: 'bingo', label: 'Bingo', thumb: thumbBingo },
+  { id: 'bingo', label: 'Bingo', thumb: thumbBingo, banner: bannerBingo },
   { id: 'turfe', label: 'Turfe', thumb: thumbTurfe, banner: bannerTurfe },
   { id: 'mina', label: 'Mina', thumb: thumbMina, banner: bannerMina },
   { id: 'torre', label: 'Torre', thumb: thumbTorre, banner: bannerTorre },
   { id: 'torremini', label: 'Torre Mini', thumb: thumbTorre, banner: bannerTorre },
   { id: 'sobedesce', label: 'Sobe-Desce', thumb: thumbSobeDesce, banner: bannerSobeDesce },
-  { id: 'roleta', label: 'Roleta', thumb: thumbRoleta },
+  { id: 'roleta', label: 'Roleta', thumb: thumbRoleta, banner: bannerRoleta },
   { id: 'batalha', label: 'Batalha', thumb: thumbBatalha, banner: bannerBatalha },
 ];
 
