@@ -7,6 +7,7 @@ interface RaceGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
@@ -26,7 +27,7 @@ const ANIMALS: { id: string; label: string; emoji: string; payout: string }[] = 
   { id: 'cabra', label: 'Cabra', emoji: '🐐', payout: '23.5x' },
 ];
 
-export function RaceGame({ credits, onBalanceChange, onWin }: RaceGameProps) {
+export function RaceGame({ credits, onBalanceChange, onWin, onRequestDeposit }: RaceGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [choice, setChoice] = useState('tigre');
   const [playing, setPlaying] = useState(false);
@@ -37,7 +38,11 @@ export function RaceGame({ credits, onBalanceChange, onWin }: RaceGameProps) {
   const betAmount = BET_STEPS[betIndex];
 
   const handlePlay = useCallback(async () => {
-    if (playing || credits < betAmount) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setPlaying(true);
     setPlayError(null);

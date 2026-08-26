@@ -7,12 +7,13 @@ interface PlinkoGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 const SLOT_MULTIPLIERS = [14, 3.5, 1.4, 0.5, 0.3, 0.5, 1.4, 3.5, 14];
 
-export function PlinkoGame({ credits, onBalanceChange, onWin }: PlinkoGameProps) {
+export function PlinkoGame({ credits, onBalanceChange, onWin, onRequestDeposit }: PlinkoGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [dropping, setDropping] = useState(false);
   const [finalSlot, setFinalSlot] = useState<number | null>(null);
@@ -22,7 +23,11 @@ export function PlinkoGame({ credits, onBalanceChange, onWin }: PlinkoGameProps)
   const betAmount = BET_STEPS[betIndex];
 
   const handleDrop = useCallback(async () => {
-    if (dropping || credits < betAmount) return;
+    if (dropping) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setDropping(true);
     setPlayError(null);

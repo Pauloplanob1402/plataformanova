@@ -614,6 +614,26 @@ body {
   animation: low-balance-glow 2s ease-in-out infinite;
 }
 
+/* Some sozinho assim que o primeiro toque destrava o áudio — não precisa de
+   botão de fechar, é só um aviso temporário de "toque em qualquer lugar". */
+.music-enable-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  margin: 4px 0 0;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--gold-bright);
+  background: rgba(21, 11, 8, 0.6);
+  border: 1px solid rgba(242, 200, 121, 0.35);
+  text-align: center;
+  animation: low-balance-glow 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
 @keyframes low-balance-glow {
   0%, 100% { box-shadow: 0 0 0 rgba(242, 200, 121, 0); }
   50% { box-shadow: 0 0 16px rgba(242, 200, 121, 0.3); }
@@ -923,10 +943,12 @@ body {
 }
 
 .dragon-tiger-table__mascot {
-  width: 40px;
-  height: 40px;
+  width: 110px;
+  height: 110px;
   object-fit: contain;
-  opacity: 0.8;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
 }
 
 .dragon-tiger-card {

@@ -7,6 +7,7 @@ interface DiceGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 type BetRange = 'low' | 'seven' | 'high';
@@ -23,7 +24,7 @@ function DiceFace({ value }: { value: number | null }) {
   return <div className="dice-face">{value ?? '?'}</div>;
 }
 
-export function DiceGame({ credits, onBalanceChange, onWin }: DiceGameProps) {
+export function DiceGame({ credits, onBalanceChange, onWin, onRequestDeposit }: DiceGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [choice, setChoice] = useState<BetRange>('low');
   const [playing, setPlaying] = useState(false);
@@ -36,7 +37,11 @@ export function DiceGame({ credits, onBalanceChange, onWin }: DiceGameProps) {
   const betAmount = BET_STEPS[betIndex];
 
   const handlePlay = useCallback(async () => {
-    if (playing || credits < betAmount) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setPlaying(true);
     setPlayError(null);

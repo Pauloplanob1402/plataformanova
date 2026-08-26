@@ -2,16 +2,18 @@ import { useCallback, useState } from 'react';
 import thumbSobeDesce from '../assets/thumb-sobedesce.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
+import { safeRpc } from '../core/withTimeout';
 
 interface HiLoGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 
-export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
+export function HiLoGame({ credits, onBalanceChange, onWin, onRequestDeposit }: HiLoGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [roundId, setRoundId] = useState<string | null>(null);
   const [currentCard, setCurrentCard] = useState<number | null>(null);
@@ -26,14 +28,18 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
   const active = roundId !== null;
 
   const handleStart = useCallback(async () => {
-    if (busy || credits < betAmount) return;
+    if (busy) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
     setBusy(true);
     setGameError(null);
     setMessage(null);
     setStreak(0);
     setMultiplier(1);
 
-    const { data, error } = await supabase.rpc('start_hilo', { bet_amount: betAmount });
+    const { data, error } = await safeRpc(supabase.rpc('start_hilo', { bet_amount: betAmount }));
 
     if (error || !data) {
       setBusy(false);
@@ -59,7 +65,7 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
 
   const handleCancelStuck = useCallback(async () => {
     setBusy(true);
-    const { error } = await supabase.rpc('cancel_stuck_round');
+    const { error } = await safeRpc(supabase.rpc('cancel_stuck_round'));
     setBusy(false);
     if (!error) {
       setStuckRound(false);
@@ -73,7 +79,7 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
       setBusy(true);
       setGameError(null);
 
-      const { data, error } = await supabase.rpc('guess_hilo', { round_id: roundId, direction });
+      const { data, error } = await safeRpc(supabase.rpc('guess_hilo', { round_id: roundId, direction }));
 
       if (error || !data) {
         setBusy(false);
@@ -111,7 +117,7 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
     setBusy(true);
     setGameError(null);
 
-    const { data, error } = await supabase.rpc('cashout_hilo', { round_id: roundId });
+    const { data, error } = await safeRpc(supabase.rpc('cashout_hilo', { round_id: roundId }));
 
     if (error || !data) {
       setBusy(false);
@@ -181,7 +187,7 @@ export function HiLoGame({ credits, onBalanceChange, onWin }: HiLoGameProps) {
         </div>
 
         {!active ? (
-          <button className="spin-btn" onClick={handleStart} disabled={busy || credits < betAmount}>
+          <button className="spin-btn" onClick={handleStart} disabled={busy}>
             {busy ? 'Iniciando…' : 'Começar'}
           </button>
         ) : (

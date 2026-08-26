@@ -7,11 +7,12 @@ interface BingoGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 
-export function BingoGame({ credits, onBalanceChange, onWin }: BingoGameProps) {
+export function BingoGame({ credits, onBalanceChange, onWin, onRequestDeposit }: BingoGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [card, setCard] = useState<number[] | null>(null);
@@ -23,7 +24,11 @@ export function BingoGame({ credits, onBalanceChange, onWin }: BingoGameProps) {
   const betAmount = BET_STEPS[betIndex];
 
   const handlePlay = useCallback(async () => {
-    if (playing || credits < betAmount) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setPlaying(true);
     setPlayError(null);

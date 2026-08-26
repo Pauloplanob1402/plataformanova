@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import mascoteTigre from '../assets/mascote-tigre.webp';
+import logoDragaoTigre from '../assets/logo-dragaotigre.webp';
 import thumbDragaoTigre from '../assets/thumb-dragaotigre.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
@@ -8,6 +8,7 @@ interface DragonTigerGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 type BetType = 'dragon' | 'tiger' | 'tie';
@@ -32,7 +33,7 @@ function cardLabel(value: number): string {
   return String(value);
 }
 
-export function DragonTigerGame({ credits, onBalanceChange, onWin }: DragonTigerGameProps) {
+export function DragonTigerGame({ credits, onBalanceChange, onWin, onRequestDeposit }: DragonTigerGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [betType, setBetType] = useState<BetType>('dragon');
   const [playing, setPlaying] = useState(false);
@@ -45,7 +46,11 @@ export function DragonTigerGame({ credits, onBalanceChange, onWin }: DragonTiger
   const betAmount = BET_STEPS[betIndex];
 
   const handlePlay = useCallback(async () => {
-    if (playing || credits < betAmount) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setPlaying(true);
     setPlayError(null);
@@ -127,7 +132,7 @@ export function DragonTigerGame({ credits, onBalanceChange, onWin }: DragonTiger
           <div className="dragon-tiger-card__face">{dragonCard ? cardLabel(dragonCard) : '?'}</div>
         </div>
 
-        <img src={mascoteTigre} alt="" className="dragon-tiger-table__mascot" />
+        <img src={logoDragaoTigre} alt="Dragão x Tigre" className="dragon-tiger-table__mascot" />
 
         <div
           className={`dragon-tiger-card ${winner === 'tiger' ? 'dragon-tiger-card--win' : ''} ${winner && winner !== 'tiger' ? 'dragon-tiger-card--lose' : ''}`}

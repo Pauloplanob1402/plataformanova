@@ -13,6 +13,7 @@ interface SlotMachineProps {
   /** Chamado depois de cada giro resolvido, pra estatística de sessão (cosmético). */
   onSpinResolved: (betAmount: number, payout: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
@@ -55,7 +56,7 @@ interface SpinRpcResult {
 
 const FEATURE_FRAME_DELAY_MS = 700;
 
-export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }: SlotMachineProps) {
+export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin, onRequestDeposit }: SlotMachineProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [spinning, setSpinning] = useState(false);
   const [displayGrid, setDisplayGrid] = useState<SlotGrid>(emptyGrid());
@@ -227,7 +228,10 @@ export function SlotMachine({ credits, onBalanceChange, onSpinResolved, onWin }:
 
   const handleSpin = useCallback(async () => {
     if (spinning) return;
-    if (credits < betAmount) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setSpinError(null);
     setLastPayout(null);

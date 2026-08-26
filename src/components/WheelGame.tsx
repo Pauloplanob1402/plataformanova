@@ -7,13 +7,14 @@ interface WheelGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 // mesma ordem/valores do SQL (0013_roda_dados.sql) — só pra desenhar a roda
 const SEGMENTS = [0, 0.5, 1, 1.5, 2, 3, 10, 16];
 
-export function WheelGame({ credits, onBalanceChange, onWin }: WheelGameProps) {
+export function WheelGame({ credits, onBalanceChange, onWin, onRequestDeposit }: WheelGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [spinning, setSpinning] = useState(false);
   const [resultMultiplier, setResultMultiplier] = useState<number | null>(null);
@@ -23,7 +24,11 @@ export function WheelGame({ credits, onBalanceChange, onWin }: WheelGameProps) {
   const betAmount = BET_STEPS[betIndex];
 
   const handleSpin = useCallback(async () => {
-    if (spinning || credits < betAmount) return;
+    if (spinning) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setSpinning(true);
     setPlayError(null);

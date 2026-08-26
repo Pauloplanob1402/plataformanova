@@ -7,12 +7,13 @@ interface LuckyNumberGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 const NUMBERS = Array.from({ length: 10 }, (_, i) => i + 1);
 
-export function LuckyNumberGame({ credits, onBalanceChange, onWin }: LuckyNumberGameProps) {
+export function LuckyNumberGame({ credits, onBalanceChange, onWin, onRequestDeposit }: LuckyNumberGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [choice, setChoice] = useState(7);
   const [playing, setPlaying] = useState(false);
@@ -23,7 +24,11 @@ export function LuckyNumberGame({ credits, onBalanceChange, onWin }: LuckyNumber
   const betAmount = BET_STEPS[betIndex];
 
   const handlePlay = useCallback(async () => {
-    if (playing || credits < betAmount) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setPlaying(true);
     setPlayError(null);

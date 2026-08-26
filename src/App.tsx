@@ -172,7 +172,7 @@ function App() {
   const { user, loading: authLoading, signOut } = useAuth();
   const { credits, kycDone, loading: profileLoading, error: profileError, setCreditsLocally, refetch } = useProfile(user);
   const { recordSpin, resetStats } = useSessionStats();
-  useBackgroundMusic();
+  const { musicEnabled } = useBackgroundMusic();
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
   const [screen, setScreen] = useState<Screen>('jogo');
   const [gameOpen, setGameOpen] = useState(false);
@@ -188,6 +188,14 @@ function App() {
   const openGame = useCallback((id: Screen) => {
     setScreen(id);
     setGameOpen(true);
+  }, []);
+
+  // Leva o jogador direto pra tela de depósito quando ele tenta jogar sem
+  // saldo suficiente — antes disso os jogos simplesmente ignoravam o clique
+  // em silêncio, o que parecia um travamento.
+  const requestDeposit = useCallback(() => {
+    setScreen('deposito');
+    setGameOpen(false);
   }, []);
 
   const currentSectionScreens =
@@ -246,6 +254,12 @@ function App() {
               💰 Depositar
             </button>
           </div>
+        </div>
+      )}
+
+      {!musicEnabled && (
+        <div className="music-enable-banner" role="status">
+          🔊 Toque em qualquer lugar da tela pra ativar o som
         </div>
       )}
 
@@ -327,68 +341,68 @@ function App() {
             credits={credits ?? 0}
             onBalanceChange={setCreditsLocally}
             onSpinResolved={recordSpin}
-            onWin={triggerCelebration}
+            onWin={triggerCelebration} onRequestDeposit={requestDeposit}
           />
         )}
         {screen === 'moedas' && (
-          <HoldWinGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <HoldWinGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'dragaotigre' && (
-          <DragonTigerGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <DragonTigerGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'raspadinha' && (
-          <ScratchGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <ScratchGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'roda' && (
-          <WheelGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <WheelGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'bau' && (
-          <ChestGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <ChestGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'dados' && (
-          <DiceGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <DiceGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'moeda' && (
-          <CoinFlipGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <CoinFlipGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'numero' && (
-          <LuckyNumberGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <LuckyNumberGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'keno' && (
-          <KenoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <KenoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'pesca' && (
-          <FishingGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <FishingGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'plinko' && (
-          <PlinkoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <PlinkoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'duelo' && (
-          <DuelGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <DuelGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'bingo' && (
-          <BingoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <BingoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'turfe' && (
-          <RaceGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <RaceGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'mina' && (
-          <MinesGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <MinesGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'torre' && (
-          <TowerGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <TowerGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'torremini' && (
-          <TowerGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} mini />
+          <TowerGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} mini />
         )}
         {screen === 'sobedesce' && (
-          <HiLoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <HiLoGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'roleta' && (
-          <RouletteGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <RouletteGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'batalha' && (
-          <BaccaratGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} />
+          <BaccaratGame credits={credits ?? 0} onBalanceChange={setCreditsLocally} onWin={triggerCelebration} onRequestDeposit={requestDeposit} />
         )}
         {screen === 'deposito' && <DepositScreen user={user} onDeposited={refetch} />}
         {screen === 'saque' && (

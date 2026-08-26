@@ -7,6 +7,7 @@ interface BaccaratGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 type BetType = 'player' | 'banker' | 'tie';
@@ -19,7 +20,7 @@ const BET_OPTIONS: { id: BetType; label: string; payout: string }[] = [
   { id: 'banker', label: '🏦 Banca', payout: 'ganha 2.12x' },
 ];
 
-export function BaccaratGame({ credits, onBalanceChange, onWin }: BaccaratGameProps) {
+export function BaccaratGame({ credits, onBalanceChange, onWin, onRequestDeposit }: BaccaratGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [betType, setBetType] = useState<BetType>('player');
   const [playing, setPlaying] = useState(false);
@@ -32,7 +33,11 @@ export function BaccaratGame({ credits, onBalanceChange, onWin }: BaccaratGamePr
   const betAmount = BET_STEPS[betIndex];
 
   const handlePlay = useCallback(async () => {
-    if (playing || credits < betAmount) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setPlaying(true);
     setPlayError(null);

@@ -8,6 +8,7 @@ interface HoldWinGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 interface SpinFrame {
@@ -31,7 +32,7 @@ function emptyCells(): (number | null)[] {
   return Array.from({ length: CELL_COUNT }, () => null);
 }
 
-export function HoldWinGame({ credits, onBalanceChange, onWin }: HoldWinGameProps) {
+export function HoldWinGame({ credits, onBalanceChange, onWin, onRequestDeposit }: HoldWinGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [spinning, setSpinning] = useState(false);
   const [cells, setCells] = useState<(number | null)[]>(emptyCells());
@@ -72,7 +73,11 @@ export function HoldWinGame({ credits, onBalanceChange, onWin }: HoldWinGameProp
   }, []);
 
   const handleSpin = useCallback(async () => {
-    if (spinning || credits < betAmount) return;
+    if (spinning) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     clearTimers();
     setSpinError(null);

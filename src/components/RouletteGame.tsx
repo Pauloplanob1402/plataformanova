@@ -7,6 +7,7 @@ interface RouletteGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 type BetType = 'straight' | 'red' | 'black' | 'even' | 'odd' | 'low' | 'high';
@@ -22,7 +23,7 @@ const OUTSIDE_BETS: { id: BetType; label: string }[] = [
   { id: 'high', label: '19-36' },
 ];
 
-export function RouletteGame({ credits, onBalanceChange, onWin }: RouletteGameProps) {
+export function RouletteGame({ credits, onBalanceChange, onWin, onRequestDeposit }: RouletteGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [betType, setBetType] = useState<BetType>('red');
   const [straightNumber, setStraightNumber] = useState(7);
@@ -34,7 +35,11 @@ export function RouletteGame({ credits, onBalanceChange, onWin }: RouletteGamePr
   const betAmount = BET_STEPS[betIndex];
 
   const handleSpin = useCallback(async () => {
-    if (spinning || credits < betAmount) return;
+    if (spinning) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setSpinning(true);
     setPlayError(null);

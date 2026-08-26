@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const MUSIC_SRC = '/audio/golden-dragon-dance.mp3';
 const MUSIC_VOLUME = 0.35;
@@ -8,8 +8,17 @@ const MUSIC_VOLUME = 0.35;
  * fica a cargo do próprio aparelho do usuário (ele abaixa se não quiser).
  *
  * Navegadores bloqueiam áudio COM SOM antes de qualquer interação do usuário
- * (política de autoplay). Por isso: tenta tocar com som direto ao abrir a
- * página; se o navegador bloquear, destrava no primeiro toque/clique/tecla.
+ * (política de autoplay) — isso vale pra QUALQUER site, em QUALQUER
+ * navegador mobile, sem exceção; não é algo contornável por código. Por
+ * isso: tenta tocar com som direto ao abrir a página; se o navegador
+ * bloquear, destrava no primeiro toque/clique/tecla EM QUALQUER LUGAR da
+ * tela (não precisa ser especificamente num jogo — é só que, na prática,
+ * tocar num jogo costuma ser a primeira coisa que a pessoa faz).
+ *
+ * Retorna `musicEnabled` pra quem usa o hook poder mostrar um aviso visual
+ * ("toque pra ativar o som") enquanto o áudio ainda não tocou de verdade —
+ * deixa claro pro usuário o momento exato em que liga, em vez de acontecer
+ * "escondido" no meio de outro toque.
  *
  * IMPORTANTE — bug real no Android corrigido aqui: a versão anterior marcava
  * "já destravado" no PRIMEIRO toque, mesmo que o play() daquele toque
@@ -24,6 +33,7 @@ export function useBackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasUnlockedRef = useRef(false);
   const attemptingRef = useRef(false);
+  const [musicEnabled, setMusicEnabled] = useState(false);
 
   useEffect(() => {
     const audio = new Audio(MUSIC_SRC);
@@ -38,6 +48,7 @@ export function useBackgroundMusic() {
       .play()
       .then(() => {
         hasUnlockedRef.current = true;
+        setMusicEnabled(true);
       })
       .catch(() => {
         // bloqueado — vai tentar de novo a cada toque, abaixo
@@ -58,6 +69,7 @@ export function useBackgroundMusic() {
         .then(() => {
           hasUnlockedRef.current = true;
           attemptingRef.current = false;
+          setMusicEnabled(true);
           const old = audioRef.current;
           audioRef.current = freshAudio;
           if (old && old !== freshAudio) {
@@ -83,4 +95,6 @@ export function useBackgroundMusic() {
       if (audioRef.current) audioRef.current.src = '';
     };
   }, []);
+
+  return { musicEnabled };
 }

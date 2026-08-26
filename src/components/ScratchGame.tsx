@@ -8,6 +8,7 @@ interface ScratchGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
@@ -17,7 +18,7 @@ function emptyGrid(): (string | null)[] {
   return Array.from({ length: CELL_COUNT }, () => null);
 }
 
-export function ScratchGame({ credits, onBalanceChange, onWin }: ScratchGameProps) {
+export function ScratchGame({ credits, onBalanceChange, onWin, onRequestDeposit }: ScratchGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [grid, setGrid] = useState<(string | null)[]>(emptyGrid());
@@ -28,7 +29,11 @@ export function ScratchGame({ credits, onBalanceChange, onWin }: ScratchGameProp
   const betAmount = BET_STEPS[betIndex];
 
   const handleBuy = useCallback(async () => {
-    if (playing || credits < betAmount) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setPlaying(true);
     setPlayError(null);

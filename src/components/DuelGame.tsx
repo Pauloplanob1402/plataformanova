@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import thumbDuelo from '../assets/thumb-duelo.webp';
-import mascoteTigre from '../assets/mascote-tigre.webp';
+import logoDuelo from '../assets/logo-duelo.webp';
 import { soundEngine } from '../sound/soundEngine';
 import { supabase } from '../core/supabaseClient';
 
@@ -8,11 +8,12 @@ interface DuelGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 
-export function DuelGame({ credits, onBalanceChange, onWin }: DuelGameProps) {
+export function DuelGame({ credits, onBalanceChange, onWin, onRequestDeposit }: DuelGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [playerDie, setPlayerDie] = useState<number | null>(null);
@@ -24,7 +25,11 @@ export function DuelGame({ credits, onBalanceChange, onWin }: DuelGameProps) {
   const betAmount = BET_STEPS[betIndex];
 
   const handlePlay = useCallback(async () => {
-    if (playing || credits < betAmount) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setPlaying(true);
     setPlayError(null);
@@ -96,7 +101,7 @@ export function DuelGame({ credits, onBalanceChange, onWin }: DuelGameProps) {
           <div className="dragon-tiger-card__face">{playerDie ?? '?'}</div>
         </div>
 
-        <img src={mascoteTigre} alt="" className="dragon-tiger-table__mascot" />
+        <img src={logoDuelo} alt="Duelo do Tigre" className="dragon-tiger-table__mascot" />
 
         <div className={`dragon-tiger-card ${outcome === 'lose' ? 'dragon-tiger-card--win' : ''} ${outcome === 'win' ? 'dragon-tiger-card--lose' : ''}`}>
           <span className="dragon-tiger-card__label">Tigre</span>

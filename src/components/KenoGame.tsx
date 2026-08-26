@@ -7,13 +7,14 @@ interface KenoGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 const NUMBERS = Array.from({ length: 40 }, (_, i) => i + 1);
 const PICKS_NEEDED = 5;
 
-export function KenoGame({ credits, onBalanceChange, onWin }: KenoGameProps) {
+export function KenoGame({ credits, onBalanceChange, onWin, onRequestDeposit }: KenoGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [picks, setPicks] = useState<number[]>([]);
   const [drawn, setDrawn] = useState<number[]>([]);
@@ -33,7 +34,12 @@ export function KenoGame({ credits, onBalanceChange, onWin }: KenoGameProps) {
   };
 
   const handlePlay = useCallback(async () => {
-    if (playing || credits < betAmount || picks.length !== PICKS_NEEDED) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
+    if (picks.length !== PICKS_NEEDED) return;
 
     setPlaying(true);
     setPlayError(null);

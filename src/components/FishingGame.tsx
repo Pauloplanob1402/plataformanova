@@ -7,11 +7,12 @@ interface FishingGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 
-export function FishingGame({ credits, onBalanceChange, onWin }: FishingGameProps) {
+export function FishingGame({ credits, onBalanceChange, onWin, onRequestDeposit }: FishingGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [casting, setCasting] = useState(false);
   const [caughtMultiplier, setCaughtMultiplier] = useState<number | null>(null);
@@ -21,7 +22,11 @@ export function FishingGame({ credits, onBalanceChange, onWin }: FishingGameProp
   const betAmount = BET_STEPS[betIndex];
 
   const handleCast = useCallback(async () => {
-    if (casting || credits < betAmount) return;
+    if (casting) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setCasting(true);
     setPlayError(null);

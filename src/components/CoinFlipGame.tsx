@@ -7,13 +7,14 @@ interface CoinFlipGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 type Side = 'heads' | 'tails';
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 
-export function CoinFlipGame({ credits, onBalanceChange, onWin }: CoinFlipGameProps) {
+export function CoinFlipGame({ credits, onBalanceChange, onWin, onRequestDeposit }: CoinFlipGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [choice, setChoice] = useState<Side>('heads');
   const [playing, setPlaying] = useState(false);
@@ -25,7 +26,11 @@ export function CoinFlipGame({ credits, onBalanceChange, onWin }: CoinFlipGamePr
   const betAmount = BET_STEPS[betIndex];
 
   const handlePlay = useCallback(async () => {
-    if (playing || credits < betAmount) return;
+    if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
     setPlaying(true);
     setFlipping(true);

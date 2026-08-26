@@ -7,11 +7,12 @@ interface ChestGameProps {
   credits: number;
   onBalanceChange: (newBalance: number) => void;
   onWin: (amount: number) => void;
+  onRequestDeposit: () => void;
 }
 
 const BET_STEPS = [5, 10, 25, 50, 100];
 
-export function ChestGame({ credits, onBalanceChange, onWin }: ChestGameProps) {
+export function ChestGame({ credits, onBalanceChange, onWin, onRequestDeposit }: ChestGameProps) {
   const [betIndex, setBetIndex] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [values, setValues] = useState<(number | null)[]>([null, null, null]);
@@ -23,7 +24,11 @@ export function ChestGame({ credits, onBalanceChange, onWin }: ChestGameProps) {
 
   const handlePick = useCallback(
     async (index: number) => {
-      if (playing || credits < betAmount) return;
+      if (playing) return;
+    if (credits < betAmount) {
+      onRequestDeposit();
+      return;
+    }
 
       setPlaying(true);
       setPlayError(null);
