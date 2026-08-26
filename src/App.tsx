@@ -122,7 +122,7 @@ const SECTION_TABS: { id: Section; label: string }[] = [
 ];
 
 const GAME_SCREENS: { id: Screen; label: string; thumb?: string; banner?: string }[] = [
-  { id: 'jogo', label: '🐯 Tigrinho', banner: bannerTigrinho },
+  { id: 'jogo', label: 'Tigrinho', banner: bannerTigrinho },
   { id: 'moedas', label: 'Moedas', thumb: thumbMoedas, banner: bannerMoedas },
   { id: 'dragaotigre', label: 'Dragão x Tigre', thumb: thumbDragaoTigre, banner: bannerDragaoTigre },
   { id: 'raspadinha', label: 'Raspadinha', thumb: thumbRaspadinha, banner: bannerRaspadinha },

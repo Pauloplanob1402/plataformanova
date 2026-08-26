@@ -490,28 +490,36 @@ body {
 }
 
 .game-banner__overlay {
+  /* Ocupa só a metade direita (a área vermelha "vazia" do banner) e centraliza
+     o conteúdo nela, nos dois eixos — em vez de grudar no canto superior direito. */
   position: absolute;
   inset: 0;
+  left: 44%;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding-right: 6%;
-  text-align: right;
+  gap: 10px;
+  text-align: center;
 }
 
 .game-banner--wide .game-banner__label {
-  font-size: clamp(16px, 4.5vw, 22px);
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6), 0 0 14px rgba(0, 0, 0, 0.4);
+  font-size: clamp(20px, 6.2vw, 30px);
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75), 0 0 22px rgba(242, 200, 121, 0.55);
 }
 
 .game-banner--wide .game-banner__play {
-  font-size: clamp(11px, 3vw, 13px);
-  background: rgba(21, 11, 8, 0.55);
-  padding: 3px 10px;
+  font-size: clamp(12px, 3.4vw, 15px);
+  font-weight: 700;
+  background: linear-gradient(180deg, var(--crimson), var(--crimson-deep));
+  color: var(--gold-bright);
+  padding: 7px 20px;
   border-radius: 20px;
-  border: 1px solid rgba(242, 200, 121, 0.5);
+  border: 1px solid var(--gold-bright);
+  box-shadow: 0 4px 14px rgba(184, 23, 47, 0.5);
 }
 
 .game-banner--wide:hover .game-banner__art,
