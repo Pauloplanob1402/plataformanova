@@ -491,10 +491,14 @@ body {
 
 .game-banner__overlay {
   /* Ocupa só a metade direita (a área vermelha "vazia" do banner) e centraliza
-     o conteúdo nela, nos dois eixos — em vez de grudar no canto superior direito. */
+     o conteúdo nela, nos dois eixos — em vez de grudar no canto superior direito.
+     Uso translate em vez de só justify-content pra garantir a centralização
+     vertical exata, sem depender de altura de conteúdo/flex do pai. */
   position: absolute;
-  inset: 0;
+  top: 50%;
   left: 44%;
+  right: 4%;
+  transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
