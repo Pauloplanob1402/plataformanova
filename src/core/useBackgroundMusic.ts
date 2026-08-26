@@ -11,20 +11,19 @@ const MUSIC_VOLUME = 0.35;
  * (política de autoplay). Por isso: tenta tocar com som direto ao abrir a
  * página; se o navegador bloquear, destrava no primeiro toque/clique/tecla.
  *
- * IMPORTANTE (bug corrigido — só acontecia no celular): a tentativa de
- * autoplay no carregamento cria uma Promise que no mobile demora mais pra
- * resolver do que no desktop. Se o primeiro toque do usuário acontecer
- * ANTES dessa Promise terminar, chamar .play() de novo no MESMO elemento
- * conta como "interrompido" pro navegador — e isso não é reconhecido como
- * gesto válido do usuário pela política de autoplay mobile, então trava
- * mudo pra sempre (o desktop quase nunca sofre disso porque a resposta é
- * praticamente instantânea). A correção: no primeiro toque, nunca reusa
- * esse elemento "manchado" — cria um <audio> NOVO do zero e toca ele
- * direto, de forma síncrona, dentro do próprio gesto.
+ * IMPORTANTE — bug real no Android corrigido aqui: a versão anterior marcava
+ * "já destravado" no PRIMEIRO toque, mesmo que o play() daquele toque
+ * falhasse (o que acontece em alguns Chrome/WebView Android por causa do
+ * tempo de buffer/decode do MP3). Depois disso, os próximos toques eram
+ * ignorados e a música nunca mais tentava tocar — silêncio permanente.
+ * Agora só marcamos como destravado DEPOIS que o play() realmente confirma
+ * sucesso (via .then()); enquanto isso não acontecer, TODO toque seguinte
+ * tenta de novo, com um elemento <audio> novo a cada tentativa.
  */
 export function useBackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hasUnlockedRef = useRef(false);
+  const attemptingRef = useRef(false);
 
   useEffect(() => {
     const audio = new Audio(MUSIC_SRC);
@@ -35,42 +34,51 @@ export function useBackgroundMusic() {
 
     // tenta tocar já com som ligado assim que a página abre (funciona
     // direto no desktop e em alguns navegadores mobile mais permissivos)
-    audio.play().then(() => {
-      hasUnlockedRef.current = true;
-    }).catch(() => {
-      // bloqueado — vai destravar no primeiro toque abaixo, com um
-      // elemento novo (nunca reaproveitando este que já falhou)
-    });
+    audio
+      .play()
+      .then(() => {
+        hasUnlockedRef.current = true;
+      })
+      .catch(() => {
+        // bloqueado — vai tentar de novo a cada toque, abaixo
+      });
 
-    const unlockOnFirstInteraction = () => {
-      if (hasUnlockedRef.current) return;
-      hasUnlockedRef.current = true;
+    const tryUnlock = () => {
+      if (hasUnlockedRef.current || attemptingRef.current) return;
+      attemptingRef.current = true;
 
-      // elemento novo, tocado de forma síncrona dentro do próprio gesto —
-      // é o único jeito garantido de passar na política de autoplay mobile
+      // elemento novo a cada tentativa, tocado de forma síncrona dentro do
+      // próprio gesto — evita reaproveitar um <audio> que já "gastou" a
+      // permissão de autoplay numa tentativa anterior que falhou
       const freshAudio = new Audio(MUSIC_SRC);
       freshAudio.loop = true;
       freshAudio.volume = MUSIC_VOLUME;
-      freshAudio.play().catch(() => {
-        // se mesmo assim falhar, não trava a experiência do usuário
-      });
-
-      // troca a referência e limpa a antiga, sem deixar dois áudios tocando
-      const old = audioRef.current;
-      audioRef.current = freshAudio;
-      if (old && old !== freshAudio) {
-        old.pause();
-        old.src = '';
-      }
+      freshAudio
+        .play()
+        .then(() => {
+          hasUnlockedRef.current = true;
+          attemptingRef.current = false;
+          const old = audioRef.current;
+          audioRef.current = freshAudio;
+          if (old && old !== freshAudio) {
+            old.pause();
+            old.src = '';
+          }
+          // sucesso confirmado — agora sim pode parar de tentar
+          events.forEach((evt) => document.removeEventListener(evt, tryUnlock));
+        })
+        .catch(() => {
+          // falhou de novo (comum em navegador embutido de app tipo
+          // Facebook/Instagram/WhatsApp) — libera pra tentar no próximo toque
+          attemptingRef.current = false;
+        });
     };
 
     const events: Array<keyof DocumentEventMap> = ['pointerdown', 'touchstart', 'touchend', 'keydown', 'click'];
-    events.forEach((evt) =>
-      document.addEventListener(evt, unlockOnFirstInteraction, { once: true, passive: true }),
-    );
+    events.forEach((evt) => document.addEventListener(evt, tryUnlock, { passive: true }));
 
     return () => {
-      events.forEach((evt) => document.removeEventListener(evt, unlockOnFirstInteraction));
+      events.forEach((evt) => document.removeEventListener(evt, tryUnlock));
       audioRef.current?.pause();
       if (audioRef.current) audioRef.current.src = '';
     };

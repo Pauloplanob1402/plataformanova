@@ -100,6 +100,12 @@ export function DragonTigerGame({ credits, onBalanceChange, onWin }: DragonTiger
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, betType, credits, onBalanceChange, onWin, playing]);
 

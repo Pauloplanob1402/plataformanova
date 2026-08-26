@@ -78,6 +78,12 @@ export function KenoGame({ credits, onBalanceChange, onWin }: KenoGameProps) {
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, credits, onBalanceChange, onWin, picks, playing]);
 

@@ -66,6 +66,12 @@ export function FishingGame({ credits, onBalanceChange, onWin }: FishingGameProp
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, casting, credits, onBalanceChange, onWin]);
 

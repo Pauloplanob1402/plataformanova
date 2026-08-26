@@ -73,6 +73,12 @@ export function DuelGame({ credits, onBalanceChange, onWin }: DuelGameProps) {
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, credits, onBalanceChange, onWin, playing]);
 

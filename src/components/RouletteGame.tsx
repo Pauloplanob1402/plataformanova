@@ -83,6 +83,12 @@ export function RouletteGame({ credits, onBalanceChange, onWin }: RouletteGamePr
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, betType, straightNumber, credits, onBalanceChange, onWin, spinning]);
 

@@ -68,6 +68,12 @@ export function LuckyNumberGame({ credits, onBalanceChange, onWin }: LuckyNumber
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, choice, credits, onBalanceChange, onWin, playing]);
 

@@ -69,6 +69,12 @@ export function ChestGame({ credits, onBalanceChange, onWin }: ChestGameProps) {
         } catch {
           // ignora falha de áudio
         }
+      } else {
+        try {
+          soundEngine.lose();
+        } catch {
+          // ignora falha de áudio
+        }
       }
     },
     [betAmount, credits, onBalanceChange, onWin, playing],

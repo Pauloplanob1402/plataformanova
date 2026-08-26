@@ -68,6 +68,12 @@ export function WheelGame({ credits, onBalanceChange, onWin }: WheelGameProps) {
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, credits, onBalanceChange, onWin, spinning]);
 

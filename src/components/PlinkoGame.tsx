@@ -67,6 +67,12 @@ export function PlinkoGame({ credits, onBalanceChange, onWin }: PlinkoGameProps)
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, credits, dropping, onBalanceChange, onWin]);
 

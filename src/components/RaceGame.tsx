@@ -82,6 +82,12 @@ export function RaceGame({ credits, onBalanceChange, onWin }: RaceGameProps) {
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, choice, credits, onBalanceChange, onWin, playing]);
 

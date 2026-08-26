@@ -72,6 +72,12 @@ export function BingoGame({ credits, onBalanceChange, onWin }: BingoGameProps) {
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, credits, onBalanceChange, onWin, playing]);
 

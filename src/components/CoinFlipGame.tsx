@@ -74,6 +74,12 @@ export function CoinFlipGame({ credits, onBalanceChange, onWin }: CoinFlipGamePr
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, choice, credits, onBalanceChange, onWin, playing]);
 

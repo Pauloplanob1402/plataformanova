@@ -81,6 +81,12 @@ export function BaccaratGame({ credits, onBalanceChange, onWin }: BaccaratGamePr
       } catch {
         // ignora falha de áudio
       }
+    } else {
+      try {
+        soundEngine.lose();
+      } catch {
+        // ignora falha de áudio
+      }
     }
   }, [betAmount, betType, credits, onBalanceChange, onWin, playing]);
 
