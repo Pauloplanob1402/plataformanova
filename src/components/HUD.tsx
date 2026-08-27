@@ -11,8 +11,9 @@ export function HUD({ credits, onReset, onSignOut }: HUDProps) {
     <header className="hud">
       <div className="hud__brand">
         <img src={mascoteTigre} alt="Mascote Tigrinho" className="hud__mascot" />
-        <div>
+        <div className="hud__brand-text">
           <h1 className="hud__title">Tigrinho da Sorte</h1>
+          <p className="hud__tagline">20 chances. Uma escolha. Boa sorte.</p>
         </div>
       </div>
       <div className="hud__stats">

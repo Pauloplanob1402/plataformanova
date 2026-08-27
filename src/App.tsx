@@ -263,7 +263,7 @@ function App() {
         </div>
       )}
 
-      <LiveWinsTicker />
+      <LiveWinsTicker user={user} onClaimBonus={() => setScreen('bonus')} />
 
       <nav className="section-tabs" role="tablist" aria-label="Seções">
         {SECTION_TABS.map((s) => (
