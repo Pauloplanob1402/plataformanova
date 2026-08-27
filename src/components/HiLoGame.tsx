@@ -52,7 +52,7 @@ export function HiLoGame({ credits, onBalanceChange, onWin, onRequestDeposit }: 
       return;
     }
 
-    onBalanceChange(credits - betAmount);
+    onBalanceChange(data.new_balance);
     setRoundId(data.round_id);
     setCurrentCard(data.current_card);
     setBusy(false);

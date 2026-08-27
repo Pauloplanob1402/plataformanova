@@ -1,0 +1,49 @@
+-- =============================================================================
+-- Tigrinho da Sorte — 0029: CORREÇÃO CRÍTICA — fecha vazamento de mine_positions
+-- =============================================================================
+-- VULNERABILIDADE REAL (achada por revisão manual, não simulação): a policy
+-- "game_rounds_select_own" (criada em 0020) deixa o próprio jogador ler,
+-- via SELECT direto na tabela, TODA a linha da própria rodada — inclusive a
+-- coluna `state`, que guarda `mine_positions` (Mina) e `trap_positions`
+-- (Torre/Torre Mini) em texto puro, gravados no INÍCIO da rodada, antes de
+-- qualquer célula ser revelada.
+--
+-- Isso é diferente das RPCs (start_mines, reveal_mines_cell, etc.), que são
+-- SECURITY DEFINER e devolvem só os campos seguros (nunca a posição das
+-- minas antes de perder ou zerar a grade) — o problema é que RLS não é a
+-- única porta de entrada: o Supabase expõe toda tabela do schema "public"
+-- também via API REST direta (PostgREST), e RLS é o único controle de
+-- acesso *dessa* porta. Bastava o jogador chamar
+--   GET /rest/v1/game_rounds?select=state&status=eq.active
+-- direto (DevTools, curl, um script) usando o próprio token de login dele
+-- — sem precisar do site nem do React — pra ver onde estão todas as minas
+-- ANTES de clicar em qualquer célula. Zero risco, saque garantido no
+-- multiplicador máximo, e automatizável. Prioridade máxima.
+--
+-- CORREÇÃO: remove essa policy de SELECT inteira. Conferido que o frontend
+-- NUNCA lê essa tabela diretamente (grep em todo o src/ não encontra nenhum
+-- `.from('game_rounds')`) — tudo já passa pelas RPCs, que continuam
+-- funcionando normalmente (são SECURITY DEFINER, ignoram RLS de propósito).
+-- Sem policy de SELECT nenhuma = a tabela fica inacessível via API REST
+-- direta pro client, ponto. Isso não quebra nada que já existe.
+--
+-- Se um dia precisar de uma tela de "histórico de rodadas", NÃO reabra esta
+-- policy — crie uma RPC nova (SECURITY DEFINER) que devolve só os campos
+-- seguros de rodadas já finalizadas (status <> 'active'), nunca a `state`
+-- de uma rodada ainda ativa.
+--
+-- Rode DEPOIS de 0001-0028 já aplicadas. Cole no SQL Editor do Supabase.
+-- APLIQUE ISSO O QUANTO ANTES — é a única migration desta lista que
+-- corrige uma falha ativa e explorável agora, não uma melhoria.
+-- =============================================================================
+
+drop policy if exists "game_rounds_select_own" on public.game_rounds;
+
+-- (RLS continua ligado na tabela — só não sobrou nenhuma policy de SELECT,
+-- então por padrão do Postgres/RLS: nenhuma linha é visível via API REST
+-- direta pra ninguém, nem pro dono da rodada. As RPCs continuam acessando
+-- a tabela normalmente porque são SECURITY DEFINER e ignoram RLS.)
+
+-- =============================================================================
+-- Como aplicar: Supabase -> SQL Editor -> New query -> cole este arquivo -> Run
+-- =============================================================================

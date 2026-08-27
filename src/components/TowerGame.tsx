@@ -58,7 +58,7 @@ export function TowerGame({ credits, onBalanceChange, onWin, onRequestDeposit, m
       return;
     }
 
-    onBalanceChange(credits - betAmount);
+    onBalanceChange(data.new_balance);
     setRoundId(data.round_id);
     setLevels(data.levels);
     setBusy(false);
