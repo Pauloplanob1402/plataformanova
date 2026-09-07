@@ -23,6 +23,7 @@ import bannerBatalha from './assets/banner-batalha.webp';
 import bannerSobeDesce from './assets/banner-sobedesce.webp';
 import bannerMina from './assets/banner-mina.webp';
 import bannerTorre from './assets/banner-torre.webp';
+import bannerTorreMini from './assets/banner-torremini.webp';
 import bannerTurfe from './assets/banner-turfe.webp';
 import bannerDuelo from './assets/banner-duelo.webp';
 import bannerPlinko from './assets/banner-plinko.webp';
@@ -139,7 +140,7 @@ const GAME_SCREENS: { id: Screen; label: string; thumb?: string; banner?: string
   { id: 'turfe', label: 'Turfe', thumb: thumbTurfe, banner: bannerTurfe },
   { id: 'mina', label: 'Mina', thumb: thumbMina, banner: bannerMina },
   { id: 'torre', label: 'Torre', thumb: thumbTorre, banner: bannerTorre },
-  { id: 'torremini', label: 'Torre Mini', thumb: thumbTorre, banner: bannerTorre },
+  { id: 'torremini', label: 'Torre Mini', thumb: thumbTorre, banner: bannerTorreMini },
   { id: 'sobedesce', label: 'Sobe-Desce', thumb: thumbSobeDesce, banner: bannerSobeDesce },
   { id: 'roleta', label: 'Roleta', thumb: thumbRoleta, banner: bannerRoleta },
   { id: 'batalha', label: 'Batalha', thumb: thumbBatalha, banner: bannerBatalha },
