@@ -32,25 +32,60 @@ html, body, #root {
 body {
   margin: 0;
   font-family: var(--font-body);
-  background:
-    linear-gradient(180deg, rgba(11, 6, 5, 0.55) 0%, rgba(11, 6, 5, 0.75) 40%, var(--void-deep) 85%),
-    url('./assets/background-temple.webp') center 30% / cover no-repeat;
   background-color: var(--void-deep);
   color: var(--parchment);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh; /* fallback pra navegadores sem suporte a dvh */
   min-height: 100dvh; /* altura real visível no mobile, ignora a barra do navegador */
+  position: relative;
+  isolation: isolate; /* o ::before fica atrás só do conteúdo do body, sem brigar com z-index de modais/overlays */
+}
+
+/* Fundo em camada FIXA na viewport (não mais "no background do body", que
+   escalava a imagem pela altura TOTAL da página). Antes, em páginas mais
+   compridas o "cover" esticava a arte e a faixa clara de moedas/luz do
+   background-temple.webp acabava caindo bem no meio da tela, numa altura
+   onde o degradê ainda não tinha fechado 100% — "vazando" atrás dos cards
+   de jogo. Fixando em 100dvh, o cover sempre calcula em cima do tamanho da
+   tela (não do conteúdo), então aquela faixa fica sempre ancorada perto do
+   topo, onde o degradê já cobre por completo — nunca mais aparece atrás da
+   grade de jogos, não importa o quão comprida a página fique. Como bonus,
+   o fundo fica "parado" enquanto o conteúdo rola por cima (efeito parallax
+   sutil), e ganha uma respiração lenta (Ken Burns) pra não ficar estático.
+*/
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(11, 6, 5, 0.55) 0%, rgba(11, 6, 5, 0.8) 45%, var(--void-deep) 78%),
+    url('./assets/background-temple.webp') center 30% / cover no-repeat;
+  animation: bg-breathe 40s ease-in-out infinite alternate;
+  will-change: transform;
 }
 
 /* Em telas estreitas (celular), a imagem widescreen do templo corta mal o
    mascote. Troca por uma versão vertical dedicada, ancorada no topo e
    esmaecendo em degradê pro resto da tela — evita esticar/cortar a arte. */
 @media (max-width: 640px) {
-  body {
+  body::before {
     background:
-      linear-gradient(180deg, rgba(11, 6, 5, 0.25) 0%, rgba(11, 6, 5, 0.88) 58%, var(--void-deep) 92%),
+      linear-gradient(180deg, rgba(11, 6, 5, 0.25) 0%, rgba(11, 6, 5, 0.92) 55%, var(--void-deep) 80%),
       url('./assets/background-temple-mobile.webp') top center / 440px auto no-repeat;
-    background-color: var(--void-deep);
+  }
+}
+
+@keyframes bg-breathe {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.06); }
+}
+
+/* Respeita quem prefere menos movimento na tela — fundo fica estático, sem
+   perder a correção do vazamento (que não depende da animação). */
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
   }
 }
 
